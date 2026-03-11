@@ -1,0 +1,24 @@
+{
+  "name": "待辦事項 - Todo List",
+  "short_name": "待辦事項",
+  "description": "一個簡潔美觀的待辦事項應用",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F4F0ED",
+  "theme_color": "#81DDE6",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
