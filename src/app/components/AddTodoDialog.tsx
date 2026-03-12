@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { TodoCategory } from '../types';
+import { Todo, TodoCategory } from '../types';
+import { getLocalDateString, getLocalTimeString } from '../utils/date';
 
 interface AddTodoDialogProps {
   open: boolean;
@@ -13,6 +14,8 @@ interface AddTodoDialogProps {
     duration?: number;
     category?: TodoCategory;
   }) => void;
+  onEdit?: (todo: Todo) => void;
+  editingTodo?: Todo | null;
   categories: TodoCategory[];
   onAddCategory: (category: TodoCategory) => void;
 }
@@ -21,15 +24,14 @@ export function AddTodoDialog({
   open,
   onClose,
   onAdd,
+  onEdit,
+  editingTodo,
   categories,
   onAddCategory,
 }: AddTodoDialogProps) {
-  const now = new Date();
   const [content, setContent] = useState('');
-  const [date, setDate] = useState(now.toISOString().split('T')[0]);
-  const [time, setTime] = useState(
-    now.toTimeString().slice(0, 5)
-  );
+  const [date, setDate] = useState(getLocalDateString());
+  const [time, setTime] = useState(getLocalTimeString());
   const [duration, setDuration] = useState(30); // デフォルト30分
   const [selectedCategory, setSelectedCategory] = useState<TodoCategory | undefined>();
   const [showCategoryInput, setShowCategoryInput] = useState(false);
@@ -37,11 +39,43 @@ export function AddTodoDialog({
   const [newCategoryColor, setNewCategoryColor] = useState('#81DDE6');
 
   const predefinedColors = ['#F87556', '#81DDE6', '#57D0D8', '#2A89C6', '#F4F0ED'];
+  const isEditMode = !!editingTodo;
+
+  // 每次開啟對話框時重置為今天、現在時間（新增模式）或載入待編輯資料（編輯模式）
+  useEffect(() => {
+    if (open) {
+      if (editingTodo) {
+        setContent(editingTodo.content);
+        setDate(editingTodo.date);
+        setTime(editingTodo.time);
+        setDuration(editingTodo.duration ?? 30);
+        setSelectedCategory(editingTodo.category);
+      } else {
+        setContent('');
+        setDate(getLocalDateString());
+        setTime(getLocalTimeString());
+        setDuration(30);
+        setSelectedCategory(undefined);
+      }
+      setShowCategoryInput(false);
+    }
+  }, [open, editingTodo]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (content.trim()) {
-      onAdd({ content, date, time, duration, category: selectedCategory });
+      if (isEditMode && editingTodo && onEdit) {
+        onEdit({
+          ...editingTodo,
+          content,
+          date,
+          time,
+          duration,
+          category: selectedCategory,
+        });
+      } else {
+        onAdd({ content, date, time, duration, category: selectedCategory });
+      }
       setContent('');
       setSelectedCategory(undefined);
       onClose();
@@ -82,7 +116,7 @@ export function AddTodoDialog({
           >
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold">新規追加</h2>
+                <h2 className="text-xl font-semibold">{isEditMode ? '編集' : '新規追加'}</h2>
                 <button
                   onClick={onClose}
                   className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
@@ -228,7 +262,7 @@ export function AddTodoDialog({
                   className="w-full py-3 rounded-xl text-white font-medium transition-all hover:shadow-lg"
                   style={{ backgroundColor: '#e5dad3' }}
                 >
-                  追加
+                  {isEditMode ? '更新' : '追加'}
                 </button>
               </form>
             </div>

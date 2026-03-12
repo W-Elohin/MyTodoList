@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { Plus, Folder } from 'lucide-react';
+import { Plus, Folder, Pencil } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Todo, TodoCategory } from '../types';
 import { storage } from '../utils/storage';
@@ -13,6 +13,7 @@ export function TodoList() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [categories, setCategories] = useState<TodoCategory[]>([]);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
 
   useEffect(() => {
     setTodos(storage.getTodos().filter((t) => !t.completed));
@@ -74,6 +75,15 @@ export function TodoList() {
     const updatedCategories = [...categories, category];
     setCategories(updatedCategories);
     storage.saveCategories(updatedCategories);
+  };
+
+  const handleEditTodo = (updatedTodo: Todo) => {
+    const allTodos = storage.getTodos();
+    const updated = allTodos.map((t) => (t.id === updatedTodo.id ? updatedTodo : t));
+    storage.saveTodos(updated);
+    setTodos(updated.filter((t) => !t.completed));
+    setEditingTodo(null);
+    window.dispatchEvent(new Event('storage'));
   };
 
   return (
@@ -163,10 +173,17 @@ export function TodoList() {
                       </div>
                     </div>
 
-                    <button
-                      onClick={() => handleDeleteTodo(todo.id)}
-                      className="flex-shrink-0 text-red-400 hover:text-red-600 transition-colors p-1"
-                    >
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setEditingTodo(todo)}
+                        className="flex-shrink-0 text-gray-500 hover:text-gray-700 transition-colors p-1"
+                      >
+                        <Pencil size={18} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteTodo(todo.id)}
+                        className="flex-shrink-0 text-red-400 hover:text-red-600 transition-colors p-1"
+                      >
                       <svg
                         className="w-5 h-5"
                         fill="none"
@@ -180,7 +197,8 @@ export function TodoList() {
                           d="M6 18L18 6M6 6l12 12"
                         />
                       </svg>
-                    </button>
+                      </button>
+                    </div>
                   </div>
                 </motion.div>
               ))
@@ -193,16 +211,24 @@ export function TodoList() {
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        onClick={() => setShowAddDialog(true)}
+        onClick={() => {
+          setEditingTodo(null);
+          setShowAddDialog(true);
+        }}
         className="fixed bottom-24 right-6 w-16 h-16 rounded-2xl shadow-2xl flex items-center justify-center bg-white"
       >
         <Plus size={32} style={{ color: '#B5A89E' }} />
       </motion.button>
 
       <AddTodoDialog
-        open={showAddDialog}
-        onClose={() => setShowAddDialog(false)}
+        open={showAddDialog || !!editingTodo}
+        onClose={() => {
+          setShowAddDialog(false);
+          setEditingTodo(null);
+        }}
         onAdd={handleAddTodo}
+        onEdit={handleEditTodo}
+        editingTodo={editingTodo}
         categories={categories}
         onAddCategory={handleAddCategory}
       />

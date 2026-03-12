@@ -4,6 +4,7 @@ import { useSearchParams } from 'react-router';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Todo } from '../types';
 import { storage } from '../utils/storage';
+import { getLocalDateString } from '../utils/date';
 import { BackgroundAnimation } from '../components/BackgroundAnimation';
 import { BottomNav } from '../components/BottomNav';
 
@@ -12,7 +13,7 @@ export function TimelinePage() {
   const dateParam = searchParams.get('date');
   
   const [selectedDate, setSelectedDate] = useState(() => {
-    return dateParam || new Date().toISOString().split('T')[0];
+    return dateParam || getLocalDateString();
   });
   const [todos, setTodos] = useState<Todo[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -46,25 +47,31 @@ export function TimelinePage() {
     };
   }, [selectedDate]);
 
-  // 現在時刻の位置にスクロール（ページ読み込み時のみ）
+  // 現在時刻の位置にスクロール（今日を表示時、初回または日付切替時）
   useEffect(() => {
-    if (timelineRef.current && !hasScrolled.current) {
+    if (selectedDate !== getLocalDateString()) return; // 今日以外はスクロールしない
+
+    const scrollToCurrentTime = () => {
+      if (!timelineRef.current) return;
       const currentHour = currentTime.getHours();
       const currentMinute = currentTime.getMinutes();
       const currentTimeInHours = currentHour + currentMinute / 60;
-      
-      // 1時間あたりのピクセル数（60px）
       const pixelsPerHour = 60;
       const currentPosition = currentTimeInHours * pixelsPerHour;
-      
-      // ビューポートの高さの1/3の位置に現在時刻が来るようにスクロール
       const viewportHeight = window.innerHeight;
       const targetScroll = currentPosition - viewportHeight / 3;
-      
       timelineRef.current.scrollTop = Math.max(0, targetScroll);
-      hasScrolled.current = true;
+    };
+
+    if (!hasScrolled.current) {
+      // レイアウト確定後にスクロール（DOM 準備待ち）
+      const id = requestAnimationFrame(() => {
+        scrollToCurrentTime();
+        hasScrolled.current = true;
+      });
+      return () => cancelAnimationFrame(id);
     }
-  }, [currentTime, todos]);
+  }, [selectedDate, currentTime, todos]);
 
   // 時間をHH:MM形式から分単位に変換
   const timeToMinutes = (timeStr: string) => {
@@ -76,7 +83,7 @@ export function TimelinePage() {
   const currentTimeInMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
 
   // 選択した日付が今日かどうかをチェック
-  const isToday = selectedDate === new Date().toISOString().split('T')[0];
+  const isToday = selectedDate === getLocalDateString();
 
   // 各時間帯のTodoを取得
   const getTodosForHour = (hour: number) => {
@@ -121,9 +128,9 @@ export function TimelinePage() {
 
   // 日付変更関数
   const changeDate = (offset: number) => {
-    const current = new Date(selectedDate);
+    const current = new Date(selectedDate + 'T12:00:00'); // ローカル日付として解釈
     current.setDate(current.getDate() + offset);
-    setSelectedDate(current.toISOString().split('T')[0]);
+    setSelectedDate(getLocalDateString(current));
     hasScrolled.current = false; // 日付変更時に再度スクロール
   };
 
