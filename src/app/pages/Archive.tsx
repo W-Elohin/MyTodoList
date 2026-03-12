@@ -127,7 +127,7 @@ export function Archive() {
           >
             <ArrowLeft size={24} />
           </button>
-          <h1 className="text-3xl font-bold flex-1">完了済み</h1>
+          <h1 className="text-3xl font-bold flex-1 text-gray-800">完了済み</h1>
           
           {/* Import/Export Buttons */}
           <div className="flex gap-2">
@@ -161,7 +161,7 @@ export function Archive() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="完了したタスクを検索..."
-            className="w-full pl-12 pr-4 py-4 bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full pl-12 pr-4 py-4 bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800 placeholder:text-gray-500"
           />
         </div>
 
@@ -170,9 +170,9 @@ export function Archive() {
           <button
             onClick={() => setSelectedCategory(null)}
             className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${
-              !selectedCategory
+                !selectedCategory
                 ? 'bg-gray-800 text-white'
-                : 'bg-white/70 hover:bg-white/90'
+                : 'bg-white/70 hover:bg-white/90 text-gray-800'
             }`}
           >
             すべて

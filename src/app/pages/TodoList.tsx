@@ -93,7 +93,7 @@ export function TodoList() {
       <div className="max-w-md mx-auto px-4 pt-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold">ToDoリスト</h1>
+          <h1 className="text-3xl font-bold text-gray-800">ToDoリスト</h1>
           <button
             onClick={() => navigate('/archive')}
             className="p-3 bg-white/60 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all"
@@ -155,8 +155,8 @@ export function TodoList() {
                     </button>
 
                     <div className="flex-1 min-w-0">
-                      <p className="text-base mb-2 break-words">{todo.content}</p>
-                      <div className="flex flex-wrap items-center gap-2 text-sm text-gray-600">
+                      <p className="text-base mb-2 break-words text-gray-800">{todo.content}</p>
+                      <div className="flex flex-wrap items-center gap-2 text-sm text-gray-700">
                         <span>{todo.date}</span>
                         <span>{todo.time}</span>
                         {todo.category && (

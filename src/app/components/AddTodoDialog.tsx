@@ -40,6 +40,7 @@ export function AddTodoDialog({
 
   const predefinedColors = ['#F87556', '#81DDE6', '#57D0D8', '#2A89C6', '#F4F0ED'];
   const isEditMode = !!editingTodo;
+  const isFormValid = content.trim().length > 0;
 
   // 每次開啟對話框時重置為今天、現在時間（新增模式）或載入待編輯資料（編輯模式）
   useEffect(() => {
@@ -116,7 +117,7 @@ export function AddTodoDialog({
           >
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold">{isEditMode ? '編集' : '新規追加'}</h2>
+                <h2 className="text-xl font-semibold text-gray-800">{isEditMode ? '編集' : '新規追加'}</h2>
                 <button
                   onClick={onClose}
                   className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
@@ -127,11 +128,11 @@ export function AddTodoDialog({
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">内容</label>
+                  <label className="block text-sm font-medium mb-2 text-gray-700">内容</label>
                   <textarea
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none text-gray-800 placeholder:text-gray-500"
                     rows={3}
                     placeholder="ToDoを入力..."
                     required
@@ -140,27 +141,27 @@ export function AddTodoDialog({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-sm font-medium mb-2">日付</label>
+                    <label className="block text-sm font-medium mb-2 text-gray-700">日付</label>
                     <input
                       type="date"
                       value={date}
                       onChange={(e) => setDate(e.target.value)}
-                      className="w-full px-3 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm"
+                      className="w-full px-3 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm text-gray-800"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2">時間</label>
+                    <label className="block text-sm font-medium mb-2 text-gray-700">時間</label>
                     <input
                       type="time"
                       value={time}
                       onChange={(e) => setTime(e.target.value)}
-                      className="w-full px-3 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm"
+                      className="w-full px-3 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm text-gray-800"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">所要時間</label>
+                  <label className="block text-sm font-medium mb-2 text-gray-700">所要時間</label>
                   <div className="flex items-center gap-3">
                     <button
                       type="button"
@@ -175,9 +176,9 @@ export function AddTodoDialog({
                       onChange={(e) => setDuration(Math.max(15, parseInt(e.target.value) || 15))}
                       min="15"
                       step="15"
-                      className="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 text-center"
+                      className="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 text-center text-gray-800"
                     />
-                    <span className="text-sm text-gray-600">分</span>
+                    <span className="text-sm text-gray-700">分</span>
                     <button
                       type="button"
                       onClick={() => setDuration(duration + 15)}
@@ -189,7 +190,7 @@ export function AddTodoDialog({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">カテゴリー</label>
+                  <label className="block text-sm font-medium mb-2 text-gray-700">カテゴリー</label>
                   <div className="flex flex-wrap gap-2">
                     {categories.map((cat) => (
                       <button
@@ -212,7 +213,7 @@ export function AddTodoDialog({
                     <button
                       type="button"
                       onClick={() => setShowCategoryInput(!showCategoryInput)}
-                      className="px-4 py-2 rounded-xl text-sm font-medium border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors"
+                      className="px-4 py-2 rounded-xl text-sm font-medium border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors text-gray-700"
                     >
                       + 新規
                     </button>
@@ -229,7 +230,7 @@ export function AddTodoDialog({
                         value={newCategoryName}
                         onChange={(e) => setNewCategoryName(e.target.value)}
                         placeholder="カテゴリー名"
-                        className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800 placeholder:text-gray-500"
                       />
                       <div className="flex gap-2">
                         {predefinedColors.map((color) => (
@@ -260,7 +261,7 @@ export function AddTodoDialog({
                 <button
                   type="submit"
                   className="w-full py-3 rounded-xl text-white font-medium transition-all hover:shadow-lg"
-                  style={{ backgroundColor: '#e5dad3' }}
+                  style={{ backgroundColor: isFormValid ? '#2A89C6' : '#e5dad3' }}
                 >
                   {isEditMode ? '更新' : '追加'}
                 </button>

@@ -148,7 +148,7 @@ export function TimelinePage() {
       <BackgroundAnimation />
 
       <div className="max-w-md mx-auto px-4 pt-8">
-        <h1 className="text-3xl font-bold mb-4">タイムライン</h1>
+        <h1 className="text-3xl font-bold mb-4 text-gray-800">タイムライン</h1>
 
         {/* 日付選択器 */}
         <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 shadow-lg mb-4">
@@ -165,7 +165,7 @@ export function TimelinePage() {
               key={selectedDate}
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-lg font-semibold"
+              className="text-lg font-semibold text-gray-800"
             >
               {formatDateDisplay(selectedDate)}
             </motion.div>

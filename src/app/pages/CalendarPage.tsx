@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, Clock, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { Todo } from '../types';
 import { storage } from '../utils/storage';
+import { getLocalDateString } from '../utils/date';
 import { BackgroundAnimation } from '../components/BackgroundAnimation';
 import { BottomNav } from '../components/BottomNav';
 
@@ -20,8 +21,7 @@ export function CalendarPage() {
   useEffect(() => {
     loadTodos();
     
-    const today = new Date().toISOString().split('T')[0];
-    setSelectedDate(today);
+    setSelectedDate(getLocalDateString());
     
     const handleFocus = () => {
       loadTodos();
@@ -75,8 +75,7 @@ export function CalendarPage() {
   }
 
   const formatDateString = (day: number) => {
-    const d = new Date(year, month, day);
-    return d.toISOString().split('T')[0];
+    return getLocalDateString(new Date(year, month, day));
   };
 
   const selectedTodos = selectedDate ? getTodosForDate(selectedDate) : [];
@@ -86,7 +85,7 @@ export function CalendarPage() {
       <BackgroundAnimation />
 
       <div className="max-w-md mx-auto px-4 pt-8">
-        <h1 className="text-3xl font-bold mb-8">カレンダー</h1>
+        <h1 className="text-3xl font-bold mb-8 text-gray-800">カレンダー</h1>
 
         <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg mb-6">
           <div className="flex items-center justify-between mb-6">
@@ -96,7 +95,7 @@ export function CalendarPage() {
             >
               <ChevronLeft size={24} />
             </button>
-            <h2 className="text-xl font-semibold">
+            <h2 className="text-xl font-semibold text-gray-800">
               {year}年 {month + 1}月
             </h2>
             <button
@@ -124,7 +123,7 @@ export function CalendarPage() {
               const dateString = formatDateString(day);
               const todosForDay = getTodosForDate(dateString);
               const isSelected = selectedDate === dateString;
-              const isToday = dateString === new Date().toISOString().split('T')[0];
+              const isToday = dateString === getLocalDateString();
 
               return (
                 <motion.button
@@ -183,7 +182,7 @@ export function CalendarPage() {
             animate={{ opacity: 1, y: 0 }}
             className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-lg"
           >
-            <h3 className="font-semibold mb-4 flex items-center justify-between">
+            <h3 className="font-semibold mb-4 flex items-center justify-between text-gray-800">
               <span>{selectedDate} のToDo ({selectedTodos.length})</span>
               {/* <motion.button
                 whileTap={{ scale: 0.95 }}
@@ -237,12 +236,12 @@ export function CalendarPage() {
                         </div>
                       )}
                       <div className="flex-1">
-                        <p className={`font-medium mb-1 ${
+                        <p className={`font-medium mb-1 text-gray-800 ${
                           todo.completed ? 'line-through text-gray-500' : ''
                         }`}>
                           {todo.content}
                         </p>
-                        <div className="flex items-center gap-2 text-sm text-gray-600 flex-wrap">
+                        <div className="flex items-center gap-2 text-sm text-gray-700 flex-wrap">
                           <span>{todo.time}</span>
                           {todo.completed && (
                             <span className="px-2 py-0.5 rounded-xl text-xs bg-gray-600 text-white">
