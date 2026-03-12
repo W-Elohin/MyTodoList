@@ -78,7 +78,7 @@ export function AddTodoDialog({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ type: 'spring', bounce: 0.3, duration: 0.4 }}
-            className="fixed inset-x-4 top-1/2 -translate-y-1/2 max-w-md mx-auto bg-white rounded-2xl shadow-2xl z-50 overflow-hidden"
+            className="fixed inset-x-4 top-1/2 -translate-y-1/2 max-w-md mx-auto bg-[#f4f0ed] rounded-2xl shadow-2xl z-50 overflow-hidden"
           >
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
@@ -104,7 +104,7 @@ export function AddTodoDialog({
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-sm font-medium mb-2">日付</label>
                     <input

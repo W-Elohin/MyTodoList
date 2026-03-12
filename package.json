@@ -85,5 +85,6 @@
     "overrides": {
       "vite": "6.3.5"
     }
-  }
+  },
+  "packageManager": "pnpm@8.6.6+sha1.f91f4ae8b008317b11c6606d8d17f2de0d1fc7a8"
 }
