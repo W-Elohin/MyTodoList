@@ -9,6 +9,7 @@ export interface Todo {
   content: string;
   date: string;
   time: string;
+  duration?: number; // 持続時間（分単位）
   category?: TodoCategory;
   completed: boolean;
   createdAt: number;

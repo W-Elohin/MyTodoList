@@ -10,6 +10,7 @@ interface AddTodoDialogProps {
     content: string;
     date: string;
     time: string;
+    duration?: number;
     category?: TodoCategory;
   }) => void;
   categories: TodoCategory[];
@@ -29,6 +30,7 @@ export function AddTodoDialog({
   const [time, setTime] = useState(
     now.toTimeString().slice(0, 5)
   );
+  const [duration, setDuration] = useState(30); // デフォルト30分
   const [selectedCategory, setSelectedCategory] = useState<TodoCategory | undefined>();
   const [showCategoryInput, setShowCategoryInput] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
@@ -39,7 +41,7 @@ export function AddTodoDialog({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (content.trim()) {
-      onAdd({ content, date, time, category: selectedCategory });
+      onAdd({ content, date, time, duration, category: selectedCategory });
       setContent('');
       setSelectedCategory(undefined);
       onClose();
@@ -102,14 +104,14 @@ export function AddTodoDialog({
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-sm font-medium mb-2">日付</label>
                     <input
                       type="date"
                       value={date}
                       onChange={(e) => setDate(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      className="w-full px-3 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm"
                     />
                   </div>
                   <div>
@@ -118,8 +120,37 @@ export function AddTodoDialog({
                       type="time"
                       value={time}
                       onChange={(e) => setTime(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      className="w-full px-3 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm"
                     />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">所要時間</label>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setDuration(Math.max(15, duration - 15))}
+                      className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors flex items-center justify-center text-xl"
+                    >
+                      -
+                    </button>
+                    <input
+                      type="number"
+                      value={duration}
+                      onChange={(e) => setDuration(Math.max(15, parseInt(e.target.value) || 15))}
+                      min="15"
+                      step="15"
+                      className="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 text-center"
+                    />
+                    <span className="text-sm text-gray-600">分</span>
+                    <button
+                      type="button"
+                      onClick={() => setDuration(duration + 15)}
+                      className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors flex items-center justify-center text-xl"
+                    >
+                      +
+                    </button>
                   </div>
                 </div>
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { Search, X, ArrowLeft } from 'lucide-react';
+import { Search, X, ArrowLeft, Download, Upload } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Todo, TodoCategory } from '../types';
 import { storage } from '../utils/storage';
@@ -60,6 +60,60 @@ export function Archive() {
     setCompletedTodos(updated.filter((t) => t.completed));
   };
 
+  const handleExport = () => {
+    const allTodos = storage.getTodos();
+    const categories = storage.getCategories();
+    const data = {
+      todos: allTodos,
+      categories: categories,
+      exportDate: new Date().toISOString(),
+    };
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `todo-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target?.result as string);
+        
+        if (data.todos && Array.isArray(data.todos)) {
+          storage.saveTodos(data.todos);
+          const completed = data.todos
+            .filter((t: Todo) => t.completed)
+            .sort((a: Todo, b: Todo) => (b.completedAt || 0) - (a.completedAt || 0));
+          setCompletedTodos(completed);
+        }
+        
+        if (data.categories && Array.isArray(data.categories)) {
+          storage.saveCategories(data.categories);
+          setCategories(data.categories);
+        }
+        
+        alert('データを正常にインポートしました！');
+        window.dispatchEvent(new Event('storage'));
+      } catch (error) {
+        alert('インポートに失敗しました。ファイルを確認してください。');
+      }
+    };
+    reader.readAsText(file);
+    
+    // リセット input value
+    event.target.value = '';
+  };
+
   return (
     <div className="min-h-screen pb-8" style={{ backgroundColor: '#F4F0ED' }}>
       <BackgroundAnimation />
@@ -73,7 +127,30 @@ export function Archive() {
           >
             <ArrowLeft size={24} />
           </button>
-          <h1 className="text-3xl font-bold">完了済み</h1>
+          <h1 className="text-3xl font-bold flex-1">完了済み</h1>
+          
+          {/* Import/Export Buttons */}
+          <div className="flex gap-2">
+            <button
+              onClick={handleExport}
+              className="p-2 bg-white/60 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all"
+              title="エクスポート"
+            >
+              <Download size={20} />
+            </button>
+            <label
+              className="p-2 bg-white/60 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all cursor-pointer"
+              title="インポート"
+            >
+              <Upload size={20} />
+              <input
+                type="file"
+                accept=".json"
+                onChange={handleImport}
+                className="hidden"
+              />
+            </label>
+          </div>
         </div>
 
         {/* Search Bar */}

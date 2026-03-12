@@ -1,7 +1,7 @@
 
-  # Mobile Todo List App
+  # MyTodoList
 
-  This is a code bundle for Mobile Todo List App. The original project is available at https://www.figma.com/design/2NgGmbMZom2hinOc2ivK1G/Mobile-Todo-List-App.
+  This is a code bundle for MyTodoList. The original project is available at https://www.figma.com/design/2NgGmbMZom2hinOc2ivK1G/MyTodoList.
 
   ## Running the code
 

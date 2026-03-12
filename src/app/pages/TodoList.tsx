@@ -23,6 +23,7 @@ export function TodoList() {
     content: string;
     date: string;
     time: string;
+    duration?: number;
     category?: TodoCategory;
   }) => {
     const newTodo: Todo = {
@@ -30,6 +31,7 @@ export function TodoList() {
       content: todoData.content,
       date: todoData.date,
       time: todoData.time,
+      duration: todoData.duration,
       category: todoData.category,
       completed: false,
       createdAt: Date.now(),
@@ -39,6 +41,9 @@ export function TodoList() {
     const updated = [newTodo, ...allTodos];
     storage.saveTodos(updated);
     setTodos(updated.filter((t) => !t.completed));
+    
+    // storageイベントを発火して他のタブに通知
+    window.dispatchEvent(new Event('storage'));
   };
 
   const handleToggleComplete = (id: string) => {
@@ -50,6 +55,9 @@ export function TodoList() {
     );
     storage.saveTodos(updated);
     setTodos(updated.filter((t) => !t.completed));
+    
+    // storageイベントを発火して他のタブに通知
+    window.dispatchEvent(new Event('storage'));
   };
 
   const handleDeleteTodo = (id: string) => {
@@ -57,6 +65,9 @@ export function TodoList() {
     const updated = allTodos.filter((t) => t.id !== id);
     storage.saveTodos(updated);
     setTodos(updated.filter((t) => !t.completed));
+    
+    // storageイベントを発火して他のタブに通知
+    window.dispatchEvent(new Event('storage'));
   };
 
   const handleAddCategory = (category: TodoCategory) => {
@@ -102,11 +113,9 @@ export function TodoList() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -100 }}
                   transition={{ delay: index * 0.05 }}
-                  className="bg-white/70 backdrop-blur-sm rounded-2xl p-5 shadow-lg hover:shadow-xl transition-all"
+                  className="bg-white backdrop-blur-sm rounded-2xl p-5 shadow-lg hover:shadow-xl transition-all"
                   style={{
-                    background: todo.category
-                      ? `linear-gradient(135deg, ${todo.category.color}15 0%, ${todo.category.color}05 100%)`
-                      : 'rgba(255, 255, 255, 0.7)',
+                    background: '#FFFFFF',
                   }}
                 >
                   <div className="flex items-start gap-4">

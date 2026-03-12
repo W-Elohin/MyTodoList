@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router';
-import { CheckSquare, Calendar } from 'lucide-react';
+import { CheckSquare, Calendar, Clock } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export function BottomNav() {
@@ -9,10 +9,11 @@ export function BottomNav() {
   const tabs = [
     { path: '/', icon: CheckSquare, label: 'ToDoリスト' },
     { path: '/calendar', icon: Calendar, label: 'カレンダー' },
+    { path: '/timeline', icon: Clock, label: 'タイムライン' },
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-gray-200 safe-area-inset-bottom">
+    <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-gray-200 safe-area-inset-bottom bg-[#f4f0edcc]">
       <div className="max-w-md mx-auto flex justify-around items-center h-16 px-4 bg-[#f4f0ed]">
         {tabs.map((tab) => {
           const isActive = location.pathname === tab.path;
