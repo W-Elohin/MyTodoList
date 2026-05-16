@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { X } from 'lucide-react';
+import { X, ListTodo } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
-import { Todo, TodoCategory, TodoRecurrence, RecurrenceType } from '../types';
+import { Todo, TodoCategory, TodoRecurrence, RecurrenceType, SubTask } from '../types';
 import { getLocalDateString, getLocalTimeString } from '../utils/date';
 import { useWhisper } from '../hooks/useWhisper';
 import { parseIntent } from '../utils/nlpParser';
 import { VoiceInputButton } from './VoiceInputButton';
+import { SubTaskList } from './SubTaskList';
 
 const RECURRENCE_OPTIONS: { type: RecurrenceType; label: string }[] = [
   { type: 'daily', label: '毎日' },
@@ -30,6 +31,7 @@ interface AddTodoDialogProps {
     priority?: 'low' | 'medium' | 'high';
     tags?: TodoCategory[];
     recurrence?: TodoRecurrence;
+    subtasks?: SubTask[];
   }) => void;
   onEdit?: (todo: Todo) => void;
   editingTodo?: Todo | null;
@@ -60,6 +62,8 @@ export function AddTodoDialog({
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryColor, setNewCategoryColor] = useState('#81DDE6');
   const [showVoiceSuccess, setShowVoiceSuccess] = useState(false);
+  const [subtasks, setSubtasks] = useState<SubTask[]>([]);
+  const [showSubtasks, setShowSubtasks] = useState(false);
 
   const {
     isReady,
@@ -122,6 +126,12 @@ export function AddTodoDialog({
         setRecurrence(undefined);
         setCustomInterval(1);
         setCustomDays([]);
+        setSubtasks([]);
+        setShowSubtasks(false);
+      }
+      if (editingTodo) {
+        setSubtasks(editingTodo.subtasks ?? []);
+        setShowSubtasks((editingTodo.subtasks?.length ?? 0) > 0);
       }
       setShowCategoryInput(false);
       setShowVoiceSuccess(false);
@@ -195,6 +205,7 @@ export function AddTodoDialog({
           priority,
           tags: selectedTags.length > 0 ? selectedTags : undefined,
           recurrence: finalRecurrence,
+          subtasks: subtasks.length > 0 ? subtasks : undefined,
         });
       } else {
         onAdd({
@@ -206,6 +217,7 @@ export function AddTodoDialog({
           priority,
           tags: selectedTags.length > 0 ? selectedTags : undefined,
           recurrence: finalRecurrence,
+          subtasks: subtasks.length > 0 ? subtasks : undefined,
         });
       }
       setContent('');
@@ -213,6 +225,8 @@ export function AddTodoDialog({
       setPriority(undefined);
       setSelectedTags([]);
       setRecurrence(undefined);
+      setSubtasks([]);
+      setShowSubtasks(false);
       onClose();
     }
   };
@@ -519,6 +533,48 @@ export function AddTodoDialog({
                     })}
                   </div>
                 </motion.div>
+
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => setShowSubtasks((v) => !v)}
+                    className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors mb-2"
+                  >
+                    <ListTodo size={16} />
+                    サブタスク
+                    {subtasks.length > 0 && (
+                      <span className="ml-1 px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold">
+                        {subtasks.filter((s) => s.completed).length}/{subtasks.length}
+                      </span>
+                    )}
+                  </button>
+                  <AnimatePresence>
+                    {showSubtasks && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <SubTaskList
+                          subtasks={subtasks}
+                          onToggle={(id) =>
+                            setSubtasks((prev) =>
+                              prev.map((s) => (s.id === id ? { ...s, completed: !s.completed } : s))
+                            )
+                          }
+                          onAdd={(content) =>
+                            setSubtasks((prev) => [
+                              ...prev,
+                              { id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, content, completed: false },
+                            ])
+                          }
+                          onDelete={(id) => setSubtasks((prev) => prev.filter((s) => s.id !== id))}
+                        />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
 
                 <button
                   type="submit"

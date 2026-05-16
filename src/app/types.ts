@@ -4,6 +4,12 @@ export interface TodoCategory {
   color: string;
 }
 
+export interface SubTask {
+  id: string;
+  content: string;
+  completed: boolean;
+}
+
 export type RecurrenceType = 'daily' | 'weekly' | 'monthly' | 'weekdays' | 'custom';
 
 export interface TodoRecurrence {
@@ -21,6 +27,7 @@ export interface Todo {
   category?: TodoCategory;
   priority?: 'low' | 'medium' | 'high'; // 優先度
   tags?: TodoCategory[]; // 複数タグ
+  subtasks?: SubTask[];
   recurrence?: TodoRecurrence;
   completed: boolean;
   createdAt: number;

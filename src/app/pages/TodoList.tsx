@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router';
-import { Plus, Folder, Pencil, Repeat } from 'lucide-react';
+import { Plus, Folder, Pencil, Repeat, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Todo, TodoCategory } from '../types';
+import { Todo, TodoCategory, SubTask } from '../types';
 import { storage } from '../utils/storage';
 import { getNextOccurrence, getRecurrenceLabel } from '../utils/recurrence';
 import { AddTodoDialog } from '../components/AddTodoDialog';
@@ -10,6 +10,7 @@ import { BackgroundAnimation } from '../components/BackgroundAnimation';
 import { BottomNav } from '../components/BottomNav';
 import { SearchBar, highlightText } from '../components/SearchBar';
 import { FilterChips, FilterValue } from '../components/FilterChips';
+import { SubTaskList } from '../components/SubTaskList';
 
 export function TodoList() {
   const navigate = useNavigate();
@@ -19,6 +20,7 @@ export function TodoList() {
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterValue>('all');
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
     setTodos(storage.getTodos().filter((t) => !t.completed));
@@ -53,6 +55,47 @@ export function TodoList() {
     });
   }, [todos, searchQuery, activeFilter]);
 
+  const handleSubtaskToggle = (todoId: string, subtaskId: string) => {
+    const allTodos = storage.getTodos();
+    const updated = allTodos.map((t) => {
+      if (t.id !== todoId) return t;
+      return {
+        ...t,
+        subtasks: (t.subtasks ?? []).map((s) =>
+          s.id === subtaskId ? { ...s, completed: !s.completed } : s
+        ),
+      };
+    });
+    storage.saveTodos(updated);
+    setTodos(updated.filter((t) => !t.completed));
+    window.dispatchEvent(new Event('storage'));
+  };
+
+  const handleSubtaskAdd = (todoId: string, content: string) => {
+    const allTodos = storage.getTodos();
+    const newSubtask: SubTask = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      content,
+      completed: false,
+    };
+    const updated = allTodos.map((t) =>
+      t.id === todoId ? { ...t, subtasks: [...(t.subtasks ?? []), newSubtask] } : t
+    );
+    storage.saveTodos(updated);
+    setTodos(updated.filter((t) => !t.completed));
+    window.dispatchEvent(new Event('storage'));
+  };
+
+  const handleSubtaskDelete = (todoId: string, subtaskId: string) => {
+    const allTodos = storage.getTodos();
+    const updated = allTodos.map((t) =>
+      t.id === todoId ? { ...t, subtasks: (t.subtasks ?? []).filter((s) => s.id !== subtaskId) } : t
+    );
+    storage.saveTodos(updated);
+    setTodos(updated.filter((t) => !t.completed));
+    window.dispatchEvent(new Event('storage'));
+  };
+
   const handleAddTodo = (todoData: {
     content: string;
     date: string;
@@ -62,6 +105,7 @@ export function TodoList() {
     priority?: 'low' | 'medium' | 'high';
     tags?: TodoCategory[];
     recurrence?: Todo['recurrence'];
+    subtasks?: SubTask[];
   }) => {
     const newTodo: Todo = {
       id: Date.now().toString(),
@@ -73,6 +117,7 @@ export function TodoList() {
       priority: todoData.priority,
       tags: todoData.tags,
       recurrence: todoData.recurrence,
+      subtasks: todoData.subtasks,
       completed: false,
       createdAt: Date.now(),
     };
@@ -244,6 +289,15 @@ export function TodoList() {
                             ))}
                           </div>
                         )}
+                        {todo.subtasks && todo.subtasks.length > 0 && (
+                          <button
+                            onClick={() => setExpandedId(expandedId === todo.id ? null : todo.id)}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-gray-100 text-gray-600 text-xs hover:bg-gray-200 transition-colors"
+                          >
+                            {todo.subtasks.filter((s) => s.completed).length}/{todo.subtasks.length} 完成
+                            {expandedId === todo.id ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
+                          </button>
+                        )}
                       </div>
                     </div>
 
@@ -274,6 +328,24 @@ export function TodoList() {
                       </button>
                     </div>
                   </motion.div>
+
+                  <AnimatePresence>
+                    {expandedId === todo.id && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden mt-3 pt-3 border-t border-gray-100"
+                      >
+                        <SubTaskList
+                          subtasks={todo.subtasks ?? []}
+                          onToggle={(sid) => handleSubtaskToggle(todo.id, sid)}
+                          onAdd={(content) => handleSubtaskAdd(todo.id, content)}
+                          onDelete={(sid) => handleSubtaskDelete(todo.id, sid)}
+                        />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </motion.div>
               ))
             )}

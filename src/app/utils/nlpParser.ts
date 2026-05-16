@@ -4,37 +4,86 @@ export interface ParsedIntent {
   priority?: 'low' | 'medium' | 'high';
 }
 
-/** Stub — Claude Pro 將提供完整 NLP 解析 */
-export function parseIntent(text: string): ParsedIntent {
-  const trimmed = text.trim();
-  let cleanedContent = trimmed;
+function formatDate(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function getNextWeekday(targetDay: number): Date {
+  const today = new Date();
+  const todayDay = today.getDay();
+  // Days to the next Monday (1), always at least 1 day ahead
+  const daysToNextMonday = ((1 - todayDay) + 7) % 7 || 7;
+  const nextMonday = new Date(today);
+  nextMonday.setDate(today.getDate() + daysToNextMonday);
+  // Offset from Monday (Mon=1→0, Tue=2→1, ..., Sun=0→6)
+  const offset = targetDay === 0 ? 6 : targetDay - 1;
+  const result = new Date(nextMonday);
+  result.setDate(nextMonday.getDate() + offset);
+  return result;
+}
+
+export function parseIntent(rawText: string): ParsedIntent {
+  let text = rawText.trim();
   let date: string | undefined;
-  let priority: ParsedIntent['priority'];
+  let priority: 'low' | 'medium' | 'high' | undefined;
 
   const today = new Date();
-  const toYmd = (d: Date) =>
-    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
-  if (/明天|明日/.test(trimmed)) {
+  // --- Date parsing (longest/most-specific patterns first) ---
+
+  if (/後天|あさって|明後日/.test(text)) {
+    const d = new Date(today);
+    d.setDate(d.getDate() + 2);
+    date = formatDate(d);
+    text = text.replace(/後天|あさって|明後日/g, '');
+  } else if (/明天|あした|明日/.test(text)) {
     const d = new Date(today);
     d.setDate(d.getDate() + 1);
-    date = toYmd(d);
-    cleanedContent = cleanedContent.replace(/明天|明日/g, '').trim();
-  } else if (/今天|今日/.test(trimmed)) {
-    date = toYmd(today);
-    cleanedContent = cleanedContent.replace(/今天|今日/g, '').trim();
+    date = formatDate(d);
+    text = text.replace(/明天|あした|明日/g, '');
+  } else if (/今天|今日|きょう/.test(text)) {
+    date = formatDate(today);
+    text = text.replace(/今天|今日|きょう/g, '');
   }
 
-  if (/高優先|優先度高|重要/.test(trimmed)) {
+  // Next-week day patterns: 下週一~下週日 / 来週月曜日~来週日曜日 / 下周一~下周日
+  const nextWeekPatterns: [RegExp, number][] = [
+    [/下週日|来週日曜日?|下周日/, 0],
+    [/下週一|来週月曜日?|下周一/, 1],
+    [/下週二|来週火曜日?|下周二/, 2],
+    [/下週三|来週水曜日?|下周三/, 3],
+    [/下週四|来週木曜日?|下周四/, 4],
+    [/下週五|来週金曜日?|下周五/, 5],
+    [/下週六|来週土曜日?|下周六/, 6],
+  ];
+
+  if (!date) {
+    for (const [pattern, dayIndex] of nextWeekPatterns) {
+      if (pattern.test(text)) {
+        date = formatDate(getNextWeekday(dayIndex));
+        text = text.replace(pattern, '');
+        break;
+      }
+    }
+  }
+
+  // --- Priority parsing ---
+
+  if (/重要|高優先|高优先|緊急|urgent|important/i.test(text)) {
     priority = 'high';
-    cleanedContent = cleanedContent.replace(/高優先|優先度高|重要/g, '').trim();
-  } else if (/中優先|優先度中/.test(trimmed)) {
+    text = text.replace(/重要|高優先|高优先|緊急|urgent|important/gi, '');
+  } else if (/中優先|優先度中|普通|normal|中等/i.test(text)) {
     priority = 'medium';
-    cleanedContent = cleanedContent.replace(/中優先|優先度中/g, '').trim();
-  } else if (/低優先|優先度低/.test(trimmed)) {
+    text = text.replace(/中優先|優先度中|普通|normal|中等/gi, '');
+  } else if (/低優先|優先度低/i.test(text)) {
     priority = 'low';
-    cleanedContent = cleanedContent.replace(/低優先|優先度低/g, '').trim();
+    text = text.replace(/低優先|優先度低/gi, '');
   }
 
-  return { cleanedContent: cleanedContent || trimmed, date, priority };
+  const cleanedContent = text.replace(/\s+/g, ' ').trim();
+
+  return { cleanedContent: cleanedContent || rawText.trim(), date, priority };
 }
