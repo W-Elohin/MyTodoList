@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router';
-import { CheckSquare, Calendar, Clock } from 'lucide-react';
+import { CheckSquare, Calendar, Clock, Sun } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export function BottomNav() {
@@ -7,7 +7,8 @@ export function BottomNav() {
   const location = useLocation();
 
   const tabs = [
-    { path: '/', icon: CheckSquare, label: 'ToDoリスト' },
+    { path: '/my-day', icon: Sun, label: '今日' },
+    { path: '/', icon: CheckSquare, label: 'リスト' },
     { path: '/calendar', icon: Calendar, label: 'カレンダー' },
     { path: '/timeline', icon: Clock, label: 'タイムライン' },
   ];
