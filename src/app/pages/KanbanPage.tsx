@@ -7,6 +7,7 @@ import { getLocalDateString } from '../utils/date';
 import { cancelReminder } from '../utils/reminder';
 import { BackgroundAnimation } from '../components/BackgroundAnimation';
 import { BottomNav } from '../components/BottomNav';
+import { CrabIllustration } from '../components/illustrations/CrabIllustration';
 
 type PriorityColumn = {
   key: Todo['priority'] | 'uncategorized';
@@ -146,9 +147,10 @@ export function KanbanPage() {
                         key={`${column.key}-empty`}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="text-sm text-gray-400 text-center py-10"
+                        className="flex flex-col items-center py-6"
                       >
-                        任務がありません
+                        <CrabIllustration compact />
+                        <p className="text-xs text-sky-400 mt-2">任務がありません</p>
                       </motion.div>
                     ) : (
                       columnTodos.map((todo, index) => (

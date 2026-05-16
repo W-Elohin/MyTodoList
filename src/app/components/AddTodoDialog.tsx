@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { X, ListTodo } from 'lucide-react';
+import { X, Clock, Folder, Flag, Tag, Repeat, ListChecks, type LucideIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { Todo, TodoCategory, TodoRecurrence, RecurrenceType, SubTask } from '../types';
@@ -18,6 +18,20 @@ const RECURRENCE_OPTIONS: { type: RecurrenceType; label: string }[] = [
 ];
 
 const WEEKDAY_LABELS = ['日', '月', '火', '水', '木', '金', '土'];
+
+type ToolbarKey = 'duration' | 'category' | 'priority' | 'tags' | 'recurrence' | 'subtasks';
+
+const TOOLBAR_ITEMS: { icon: LucideIcon; label: string; key: ToolbarKey }[] = [
+  { icon: Clock, label: '所要時間', key: 'duration' },
+  { icon: Folder, label: 'カテゴリー', key: 'category' },
+  { icon: Flag, label: '優先度', key: 'priority' },
+  { icon: Tag, label: 'タグ', key: 'tags' },
+  { icon: Repeat, label: '繰り返し', key: 'recurrence' },
+  { icon: ListChecks, label: 'サブタスク', key: 'subtasks' },
+];
+
+const inputClass =
+  'w-full px-3 py-2.5 rounded-xl bg-white/[0.08] border border-white/[0.15] text-sky-50 placeholder:text-sky-400/60 focus:outline-none focus:ring-2 focus:ring-sky-400/40 text-sm';
 
 interface AddTodoDialogProps {
   open: boolean;
@@ -63,7 +77,7 @@ export function AddTodoDialog({
   const [newCategoryColor, setNewCategoryColor] = useState('#81DDE6');
   const [showVoiceSuccess, setShowVoiceSuccess] = useState(false);
   const [subtasks, setSubtasks] = useState<SubTask[]>([]);
-  const [showSubtasks, setShowSubtasks] = useState(false);
+  const [openPanel, setOpenPanel] = useState<ToolbarKey | null>(null);
 
   const {
     isReady,
@@ -127,12 +141,12 @@ export function AddTodoDialog({
         setCustomInterval(1);
         setCustomDays([]);
         setSubtasks([]);
-        setShowSubtasks(false);
+        setOpenPanel(null);
       }
       if (editingTodo) {
         setSubtasks(editingTodo.subtasks ?? []);
-        setShowSubtasks((editingTodo.subtasks?.length ?? 0) > 0);
       }
+      setOpenPanel(null);
       setShowCategoryInput(false);
       setShowVoiceSuccess(false);
       setTranscript('');
@@ -226,8 +240,31 @@ export function AddTodoDialog({
       setSelectedTags([]);
       setRecurrence(undefined);
       setSubtasks([]);
-      setShowSubtasks(false);
+      setOpenPanel(null);
       onClose();
+    }
+  };
+
+  const togglePanel = (key: ToolbarKey) => {
+    setOpenPanel((prev) => (prev === key ? null : key));
+  };
+
+  const isToolbarActive = (key: ToolbarKey): boolean => {
+    switch (key) {
+      case 'duration':
+        return duration !== 30;
+      case 'category':
+        return !!selectedCategory;
+      case 'priority':
+        return !!priority;
+      case 'tags':
+        return selectedTags.length > 0;
+      case 'recurrence':
+        return !!recurrence;
+      case 'subtasks':
+        return subtasks.length > 0;
+      default:
+        return false;
     }
   };
 
@@ -249,345 +286,95 @@ export function AddTodoDialog({
     <AnimatePresence>
       {open && (
         <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
-            onClick={onClose}
-          />
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            transition={{ type: 'spring', bounce: 0.3, duration: 0.4 }}
-            className="fixed inset-x-4 top-1/2 -translate-y-1/2 max-w-md mx-auto bg-[#f4f0ed] rounded-2xl shadow-2xl z-50 overflow-hidden max-h-[90vh] overflow-y-auto"
-          >
-            <motion.div layout className="p-6">
-              <motion.div layout className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-gray-800">{isEditMode ? '編集' : '新規追加'}</h2>
-                <button
-                  onClick={onClose}
-                  className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
-                >
-                  <X size={24} />
-                </button>
-              </motion.div>
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="block text-sm font-medium text-gray-700">内容</label>
-                    <VoiceInputButton
-                      isReady={isReady}
-                      isRecording={isRecording}
-                      isProcessing={isProcessing}
-                      error={error}
-                      showSuccess={showVoiceSuccess}
-                      onToggle={handleVoiceToggle}
-                    />
-                  </div>
-                  <textarea
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none text-gray-800 placeholder:text-gray-500"
-                    rows={3}
-                    placeholder="ToDoを入力..."
-                    required
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <motion.div layout>
-                    <label className="block text-sm font-medium mb-2 text-gray-700">日付</label>
-                    <input
-                      type="date"
-                      value={date}
-                      onChange={(e) => setDate(e.target.value)}
-                      className="w-full px-3 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm text-gray-800"
-                    />
-                  </motion.div>
-                  <motion.div layout>
-                    <label className="block text-sm font-medium mb-2 text-gray-700">時間</label>
-                    <input
-                      type="time"
-                      value={time}
-                      onChange={(e) => setTime(e.target.value)}
-                      className="w-full px-3 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm text-gray-800"
-                    />
-                  </motion.div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-700">繰り返し</label>
-                  <div className="flex flex-wrap gap-2">
-                    {RECURRENCE_OPTIONS.map(({ type, label }) => (
-                      <button
-                        key={type}
-                        type="button"
-                        onClick={() => handleRecurrenceSelect(type)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
-                          recurrence?.type === type
-                            ? 'bg-[#2A89C6] text-white ring-2 ring-offset-1 ring-blue-300 scale-105'
-                            : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
-                        }`}
-                      >
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-
-                  <AnimatePresence>
-                    {recurrence?.type === 'custom' && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="mt-3 p-4 bg-white rounded-xl space-y-3 overflow-hidden"
-                      >
-                        <motion.div layout className="flex items-center gap-2">
-                          <span className="text-sm text-gray-600">間隔</span>
-                          <input
-                            type="number"
-                            min={1}
-                            value={customInterval}
-                            onChange={(e) => setCustomInterval(Math.max(1, parseInt(e.target.value) || 1))}
-                            className="w-16 px-2 py-1 rounded-lg border border-gray-200 text-center text-sm"
-                          />
-                          <span className="text-sm text-gray-600">日/週</span>
-                        </motion.div>
-                        <motion.div layout>
-                          <span className="text-sm text-gray-600 block mb-2">曜日（週次用）</span>
-                          <motion.div layout className="flex gap-1 flex-wrap">
-                            {WEEKDAY_LABELS.map((label, day) => (
-                              <button
-                                key={day}
-                                type="button"
-                                onClick={() => toggleCustomDay(day)}
-                                className={`w-9 h-9 rounded-full text-xs font-medium transition-all ${
-                                  customDays.includes(day)
-                                    ? 'bg-[#2A89C6] text-white'
-                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                }`}
-                              >
-                                {label}
-                              </button>
-                            ))}
-                          </motion.div>
-                        </motion.div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-700">所要時間</label>
-                  <motion.div layout className="flex items-center gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setDuration(Math.max(15, duration - 15))}
-                      className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors flex items-center justify-center text-xl"
-                    >
-                      -
-                    </button>
-                    <input
-                      type="number"
-                      value={duration}
-                      onChange={(e) => setDuration(Math.max(15, parseInt(e.target.value) || 15))}
-                      min="15"
-                      step="15"
-                      className="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 text-center text-gray-800"
-                    />
-                    <span className="text-sm text-gray-700">分</span>
-                    <button
-                      type="button"
-                      onClick={() => setDuration(duration + 15)}
-                      className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors flex items-center justify-center text-xl"
-                    >
-                      +
-                    </button>
-                  </motion.div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-700">カテゴリー</label>
-                  <div className="flex flex-wrap gap-2">
-                    {categories.map((cat) => (
-                      <button
-                        key={cat.id}
-                        type="button"
-                        onClick={() => setSelectedCategory(cat)}
-                        className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                          selectedCategory?.id === cat.id
-                            ? 'ring-2 ring-offset-2 ring-gray-400 scale-105'
-                            : 'hover:scale-105'
-                        }`}
-                        style={{
-                          backgroundColor: cat.color,
-                          color: cat.color === '#F4F0ED' ? '#000' : '#fff',
-                        }}
-                      >
-                        {cat.name}
-                      </button>
-                    ))}
-                    <button
-                      type="button"
-                      onClick={() => setShowCategoryInput(!showCategoryInput)}
-                      className="px-4 py-2 rounded-xl text-sm font-medium border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors text-gray-700"
-                    >
-                      + 新規
-                    </button>
-                  </div>
-
-                  <AnimatePresence>
-                    {showCategoryInput && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="mt-3 p-4 bg-gray-50 rounded-xl space-y-3 overflow-hidden"
-                      >
-                        <input
-                          type="text"
-                          value={newCategoryName}
-                          onChange={(e) => setNewCategoryName(e.target.value)}
-                          placeholder="カテゴリー名"
-                          className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-800 placeholder:text-gray-500"
-                        />
-                        <div className="flex gap-2">
-                          {predefinedColors.map((color) => (
-                            <button
-                              key={color}
-                              type="button"
-                              onClick={() => setNewCategoryColor(color)}
-                              className={`w-10 h-10 rounded-xl transition-all ${
-                                newCategoryColor === color
-                                  ? 'ring-2 ring-offset-2 ring-gray-400 scale-110'
-                                  : 'hover:scale-110'
-                              }`}
-                              style={{ backgroundColor: color }}
-                            />
-                          ))}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={handleAddCategory}
-                          className="w-full px-4 py-2 bg-gray-800 text-white rounded-xl hover:bg-gray-700 transition-colors"
-                        >
-                          追加確認
-                        </button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-700">優先度</label>
-                  <div className="flex gap-2">
-                    {(['low', 'medium', 'high'] as const).map((p) => (
-                      <button
-                        key={p}
-                        type="button"
-                        onClick={() => setPriority(priority === p ? undefined : p)}
-                        className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                          priority === p
-                            ? p === 'high'
-                              ? 'bg-red-500 text-white ring-2 ring-offset-2 ring-red-400 scale-105'
-                              : p === 'medium'
-                              ? 'bg-yellow-500 text-white ring-2 ring-offset-2 ring-yellow-400 scale-105'
-                              : 'bg-green-500 text-white ring-2 ring-offset-2 ring-green-400 scale-105'
-                            : 'bg-gray-100 text-gray-600 hover:scale-105'
-                        }`}
-                      >
-                        {p === 'high' ? '高' : p === 'medium' ? '中' : '低'}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <motion.div layout>
-                  <label className="block text-sm font-medium mb-2 text-gray-700">タグ (複数選択可)</label>
-                  <div className="flex flex-wrap gap-2">
-                    {categories.map((tag) => {
-                      const isSelected = selectedTags.some((t) => t.id === tag.id);
-                      return (
-                        <button
-                          key={`tag-${tag.id}`}
-                          type="button"
-                          onClick={() => {
-                            if (isSelected) {
-                              setSelectedTags(selectedTags.filter((t) => t.id !== tag.id));
-                            } else {
-                              setSelectedTags([...selectedTags, tag]);
-                            }
-                          }}
-                          className={`px-3 py-1 rounded-full text-xs font-medium transition-all border ${
-                            isSelected
-                              ? 'bg-blue-100 text-blue-800 border-blue-300 shadow-sm'
-                              : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
-                          }`}
-                        >
-                          # {tag.name}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </motion.div>
-
-                <div>
-                  <button
-                    type="button"
-                    onClick={() => setShowSubtasks((v) => !v)}
-                    className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors mb-2"
-                  >
-                    <ListTodo size={16} />
-                    サブタスク
-                    {subtasks.length > 0 && (
-                      <span className="ml-1 px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold">
-                        {subtasks.filter((s) => s.completed).length}/{subtasks.length}
-                      </span>
-                    )}
-                  </button>
-                  <AnimatePresence>
-                    {showSubtasks && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="overflow-hidden"
-                      >
-                        <SubTaskList
-                          subtasks={subtasks}
-                          onToggle={(id) =>
-                            setSubtasks((prev) =>
-                              prev.map((s) => (s.id === id ? { ...s, completed: !s.completed } : s))
-                            )
-                          }
-                          onAdd={(content) =>
-                            setSubtasks((prev) => [
-                              ...prev,
-                              { id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, content, completed: false },
-                            ])
-                          }
-                          onDelete={(id) => setSubtasks((prev) => prev.filter((s) => s.id !== id))}
-                        />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full py-3 rounded-xl text-white font-medium transition-all hover:shadow-lg"
-                  style={{ backgroundColor: isFormValid ? '#2A89C6' : '#e5dad3' }}
-                >
-                  {isEditMode ? '更新' : '追加'}
-                </button>
-              </form>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" onClick={onClose} />
+          <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} transition={{ type: 'spring', bounce: 0.3, duration: 0.4 }} className="fixed inset-x-4 top-[8vh] max-w-md mx-auto bg-[#0a1628]/95 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-2xl z-50 overflow-hidden max-h-[85vh] flex flex-col">
+            <motion.div className="p-5 pb-3 flex items-center justify-between flex-shrink-0">
+              <h2 className="text-xl font-semibold text-sky-50">{isEditMode ? '編集' : '新規追加'}</h2>
+              <button type="button" onClick={onClose} className="p-2 hover:bg-white/10 rounded-xl transition-colors text-sky-300"><X size={22} /></button>
             </motion.div>
+            <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 px-5 pb-5 space-y-3 overflow-y-auto">
+              <div>
+                <motion.div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-sky-200">内容</label>
+                  <VoiceInputButton isReady={isReady} isRecording={isRecording} isProcessing={isProcessing} error={error} showSuccess={showVoiceSuccess} onToggle={handleVoiceToggle} />
+                </motion.div>
+                <textarea value={content} onChange={(e) => setContent(e.target.value)} className={`${inputClass} resize-none`} rows={3} placeholder="ToDoを入力..." required />
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                {TOOLBAR_ITEMS.map(({ icon: Icon, label, key }) => {
+                  const active = isToolbarActive(key) || openPanel === key;
+                  return (
+                    <button key={key} type="button" title={label} onClick={() => togglePanel(key)} className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${active ? 'bg-sky-500/20 text-sky-100 ring-1 ring-sky-400/30' : 'bg-white/10 text-sky-300 hover:bg-white/15'}`}>
+                      <Icon size={18} />
+                    </button>
+                  );
+                })}
+              </div>
+              <AnimatePresence mode="wait">
+                {openPanel && (
+                  <motion.div key={openPanel} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden rounded-xl bg-white/[0.06] border border-white/10 p-3">
+                    {openPanel === 'duration' && (
+                      <motion.div className="flex items-center gap-2">
+                        <button type="button" onClick={() => setDuration(Math.max(15, duration - 15))} className="w-9 h-9 rounded-lg bg-white/10 text-sky-200 text-lg">-</button>
+                        <input type="number" value={duration} onChange={(e) => setDuration(Math.max(15, parseInt(e.target.value) || 15))} min={15} step={15} className={`${inputClass} text-center flex-1`} />
+                        <span className="text-sm text-sky-300">分</span>
+                        <button type="button" onClick={() => setDuration(duration + 15)} className="w-9 h-9 rounded-lg bg-white/10 text-sky-200 text-lg">+</button>
+                      </motion.div>
+                    )}
+                    {openPanel === 'category' && (
+                      <motion.div className="space-y-3">
+                        <motion.div className="flex flex-wrap gap-2">
+                          {categories.map((cat) => (
+                            <button key={cat.id} type="button" onClick={() => setSelectedCategory(cat)} className={`px-3 py-1.5 rounded-xl text-xs font-medium ${selectedCategory?.id === cat.id ? 'ring-2 ring-sky-400/50' : ''}`} style={{ backgroundColor: cat.color, color: cat.color === '#F4F0ED' ? '#000' : '#fff' }}>{cat.name}</button>
+                          ))}
+                          <button type="button" onClick={() => setShowCategoryInput(!showCategoryInput)} className="px-3 py-1.5 rounded-xl text-xs border border-dashed border-white/25 text-sky-300">+ 新規</button>
+                        </motion.div>
+                        <AnimatePresence>
+                          {showCategoryInput && (
+                            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="space-y-2 overflow-hidden">
+                              <input type="text" value={newCategoryName} onChange={(e) => setNewCategoryName(e.target.value)} placeholder="カテゴリー名" className={inputClass} />
+                              <motion.div className="flex gap-2">{predefinedColors.map((color) => (<button key={color} type="button" onClick={() => setNewCategoryColor(color)} className={`w-8 h-8 rounded-lg ${newCategoryColor === color ? 'ring-2 ring-sky-400' : ''}`} style={{ backgroundColor: color }} />))}</motion.div>
+                              <button type="button" onClick={handleAddCategory} className="w-full py-2 rounded-xl bg-sky-500/30 text-sky-100 text-sm">追加確認</button>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </motion.div>
+                    )}
+                    {openPanel === 'priority' && (
+                      <motion.div className="flex gap-2">
+                        {(['low', 'medium', 'high'] as const).map((p) => (
+                          <button key={p} type="button" onClick={() => setPriority(priority === p ? undefined : p)} className={`flex-1 py-2 rounded-xl text-sm font-medium ${priority === p ? (p === 'high' ? 'bg-red-500/80 text-white' : p === 'medium' ? 'bg-yellow-500/80 text-white' : 'bg-emerald-500/80 text-white') : 'bg-white/10 text-sky-300'}`}>{p === 'high' ? '高' : p === 'medium' ? '中' : '低'}</button>
+                        ))}
+                      </motion.div>
+                    )}
+                    {openPanel === 'tags' && (
+                      <motion.div className="flex flex-wrap gap-2">
+                        {categories.map((tag) => {
+                          const isSelected = selectedTags.some((t) => t.id === tag.id);
+                          return (<button key={`tag-${tag.id}`} type="button" onClick={() => isSelected ? setSelectedTags(selectedTags.filter((t) => t.id !== tag.id)) : setSelectedTags([...selectedTags, tag])} className={`px-3 py-1 rounded-full text-xs border ${isSelected ? 'bg-sky-500/25 text-sky-100 border-sky-400/40' : 'bg-white/5 text-sky-400 border-white/15'}`}># {tag.name}</button>);
+                        })}
+                      </motion.div>
+                    )}
+                    {openPanel === 'recurrence' && (
+                      <motion.div className="space-y-3">
+                        <motion.div className="flex flex-wrap gap-2">{RECURRENCE_OPTIONS.map(({ type, label }) => (<button key={type} type="button" onClick={() => handleRecurrenceSelect(type)} className={`px-3 py-1.5 rounded-xl text-xs ${recurrence?.type === type ? 'bg-sky-500/40 text-sky-50 ring-1 ring-sky-400/40' : 'bg-white/10 text-sky-300'}`}>{label}</button>))}</motion.div>
+                        <AnimatePresence>{recurrence?.type === 'custom' && (<motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="space-y-2 overflow-hidden"><motion.div className="flex items-center gap-2"><span className="text-sm text-sky-300">間隔</span><input type="number" min={1} value={customInterval} onChange={(e) => setCustomInterval(Math.max(1, parseInt(e.target.value) || 1))} className={`${inputClass} w-16 text-center`} /><span className="text-sm text-sky-300">日/週</span></motion.div><motion.div className="flex gap-1 flex-wrap">{WEEKDAY_LABELS.map((label, day) => (<button key={day} type="button" onClick={() => toggleCustomDay(day)} className={`w-8 h-8 rounded-full text-xs ${customDays.includes(day) ? 'bg-sky-500/40 text-sky-50' : 'bg-white/10 text-sky-400'}`}>{label}</button>))}</motion.div></motion.div>)}</AnimatePresence>
+                      </motion.div>
+                    )}
+                    {openPanel === 'subtasks' && (<SubTaskList subtasks={subtasks} onToggle={(id) => setSubtasks((prev) => prev.map((s) => (s.id === id ? { ...s, completed: !s.completed } : s)))} onAdd={(stContent) => setSubtasks((prev) => [...prev, { id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, content: stContent, completed: false }])} onDelete={(id) => setSubtasks((prev) => prev.filter((s) => s.id !== id))} />)}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              <motion.div className="grid grid-cols-2 gap-2">
+                <motion.div><label className="block text-xs font-medium mb-1 text-sky-300">日付</label><input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={inputClass} /></motion.div>
+                <motion.div><label className="block text-xs font-medium mb-1 text-sky-300">時間</label><input type="time" value={time} onChange={(e) => setTime(e.target.value)} className={inputClass} /></motion.div>
+              </motion.div>
+              <button type="submit" disabled={!isFormValid} className="w-full py-3 rounded-xl font-medium flex-shrink-0 bg-sky-500 text-white hover:bg-sky-400 disabled:bg-white/10 disabled:text-sky-600">{isEditMode ? '更新' : '追加'}</button>
+            </form>
           </motion.div>
         </>
       )}
     </AnimatePresence>
   );
 }
+

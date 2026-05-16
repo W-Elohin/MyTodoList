@@ -7,6 +7,8 @@ import { storage } from '../utils/storage';
 import { getLocalDateString } from '../utils/date';
 import { BackgroundAnimation } from '../components/BackgroundAnimation';
 import { BottomNav } from '../components/BottomNav';
+import { EmptyStateWrapper } from '../components/illustrations/EmptyStateWrapper';
+import { WhaleIllustration } from '../components/illustrations/WhaleIllustration';
 
 export function CalendarPage() {
   const navigate = useNavigate();
@@ -195,7 +197,11 @@ export function CalendarPage() {
             </h3>
             <div className="space-y-3">
               {selectedTodos.length === 0 ? (
-                <p className="text-gray-400 text-center py-4">ToDoがありません</p>
+                <EmptyStateWrapper
+                  illustration={<WhaleIllustration />}
+                  title="この日のタスクはありません"
+                  subtitle="別の日を選ぶか、新しいタスクを追加しましょう"
+                />
               ) : (
                 selectedTodos.map((todo) => (
                   <div

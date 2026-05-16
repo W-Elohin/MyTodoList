@@ -13,6 +13,10 @@ import { SearchBar, highlightText } from '../components/SearchBar';
 import { FilterChips, FilterValue } from '../components/FilterChips';
 import { SubTaskList } from '../components/SubTaskList';
 import { useConfetti } from '../hooks/useConfetti';
+import { EmptyStateWrapper } from '../components/illustrations/EmptyStateWrapper';
+import { OctopusIllustration } from '../components/illustrations/OctopusIllustration';
+import { TodoCompleteButton } from '../components/TodoCompleteButton';
+import { DeleteConfirmButton, useDeleteConfirm } from '../components/DeleteConfirmButton';
 
 export function TodoList() {
   const navigate = useNavigate();
@@ -24,6 +28,7 @@ export function TodoList() {
   const [activeFilter, setActiveFilter] = useState<FilterValue>('all');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const confetti = useConfetti();
+  const { pendingDeleteId, requestDelete } = useDeleteConfirm();
 
   useEffect(() => {
     setTodos(storage.getTodos().filter((t) => !t.completed));
@@ -225,20 +230,15 @@ export function TodoList() {
         <div className="space-y-4 mb-6 mt-2">
           <AnimatePresence mode="popLayout">
             {filteredTodos.length === 0 ? (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-center py-16 text-gray-400"
-              >
-                <p className="text-lg">
-                  {todos.length === 0 ? 'ToDoがありません' : '該当するToDoがありません'}
-                </p>
-                <p className="text-sm mt-2">
-                  {todos.length === 0
-                    ? '右下のボタンから追加してください'
-                    : '検索またはフィルターを変更してください'}
-                </p>
-              </motion.div>
+              <EmptyStateWrapper
+                illustration={<OctopusIllustration />}
+                title={todos.length === 0 ? 'タスクがまだありません' : '該当するタスクがありません'}
+                subtitle={
+                  todos.length === 0
+                    ? '下の＋ボタンから追加してみましょう！'
+                    : '検索条件を変更してください'
+                }
+              />
             ) : (
               filteredTodos.map((todo, index) => (
                 <motion.div
@@ -248,13 +248,11 @@ export function TodoList() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -100 }}
                   transition={{ delay: index * 0.05 }}
-                  className="bg-white backdrop-blur-sm rounded-2xl p-5 shadow-lg hover:shadow-xl transition-all"
+                  whileHover={{ y: -2 }}
+                  className="bg-white/10 backdrop-blur-sm rounded-2xl p-5 shadow-lg border border-white/15 hover:border-white/25 transition-colors"
                 >
                   <motion.div layout className="flex items-start gap-4">
-                    <button
-                      onClick={(e) => handleToggleComplete(todo.id, e)}
-                      className="flex-shrink-0 w-6 h-6 rounded-full border-2 border-gray-300 hover:border-blue-400 hover:bg-blue-50 transition-all mt-1"
-                    />
+                    <TodoCompleteButton onComplete={(e) => handleToggleComplete(todo.id, e)} />
 
                     <div className="flex-1 min-w-0">
                       <p className="text-base mb-2 break-words text-gray-800">
@@ -327,24 +325,10 @@ export function TodoList() {
                       >
                         <Pencil size={18} />
                       </button>
-                      <button
-                        onClick={() => handleDeleteTodo(todo.id)}
-                        className="flex-shrink-0 text-red-400 hover:text-red-600 transition-colors p-1"
-                      >
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M6 18L18 6M6 6l12 12"
-                          />
-                        </svg>
-                      </button>
+                      <DeleteConfirmButton
+                        isPending={pendingDeleteId === todo.id}
+                        onClick={() => requestDelete(todo.id, handleDeleteTodo)}
+                      />
                     </div>
                   </motion.div>
 
