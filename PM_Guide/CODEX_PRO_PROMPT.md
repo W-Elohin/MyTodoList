@@ -1,75 +1,74 @@
-# Codex Pro 任務指示：統計頁激勵系統 + 看板拖拽 + Pomodoro 計時器
+# Codex Pro 任務指示：🌊 統計頁海洋等級 + Pomodoro + 看板改善
 
 ## 角色與環境
-你是本專案的「功能開發工程師」，在 IDE 中操作。
-專案：React + Vite + TailwindCSS PWA Todo App，套件管理器 **pnpm**。
-動畫庫：`motion` (Framer Motion)，import 為 `from 'motion/react'`。圖標：`lucide-react`。
+你是「功能開發工程師」，在 IDE 中操作。
+專案：React + Vite + TailwindCSS PWA。套件管理器 **pnpm**。
+**已安裝 `animejs` (v4) 和 `@types/animejs`**。
+import: `import anime from 'animejs'`
 
-## 目前相關檔案
-- `src/app/pages/StatsPage.tsx` - 統計頁（已有基本的完成率、週趨勢、streak、分類統計）
-- `src/app/pages/KanbanPage.tsx` - 看板（已有 4 欄靜態看板）
-- `src/app/utils/statsCalculator.ts` - 統計計算函數
-- `src/app/types.ts` - 資料模型
+## 設計方向
+海洋沉浸式主題。全 App 都是深海風格。
+- 色彩：深海藍 `#0a1628`、海洋綠 `#0ea5e9`、珊瑚橙 `#f97316`、珍珠白 `#f0f9ff`
+- 卡片：glassmorphism（`backdrop-blur-xl bg-white/10 border border-white/15`）
+- 文字：`text-sky-50`, `text-sky-200`
+- 統計圖表也要配合海洋色系
 
 ## Git
-1. 確保在 `main` 分支並 pull 最新
-2. 建立 `codex-pro/feature-stats-kanban-pomodoro`
+1. 確保 main 最新
+2. 建立 `codex-pro/feature-ocean-stats-pomodoro`
 
-## 任務 A：統計頁激勵系統
+## 任務 A：海洋等級系統（StatsPage 升級）
 
-### 問題
-統計頁在沒有資料或資料很少時顯得空洞無力。
+### 用海洋生物做等級
+根據累積完成任務數，使用者的「海洋等級」會成長：
+| 累積完成 | 等級 | 圖示 |
+|---------|------|------|
+| 0-10 | プランクトン（浮游生物）| 🦠 |
+| 11-30 | イソギンチャク（海葵）| 🪸 |
+| 31-60 | クマノミ（小丑魚）| 🐠 |
+| 61-100 | タツノオトシゴ（海馬）| 🐡 |
+| 101-200 | イルカ（海豚）| 🐬 |
+| 201-500 | クジラ（鯨魚）| 🐋 |
+| 500+ | 海の王者（海之霸者）| 🔱 |
 
-### 解決方案
-1. **等級系統**：根據累積完成任務數給使用者一個「稱號」
-   - 0-10: 🌱 初心者
-   - 11-50: 🌿 見習い
-   - 51-100: 🌳 一人前
-   - 101-200: ⭐ ベテラン
-   - 201-500: 🔥 達人
-   - 500+: 👑 マスター
-   在 StatsPage 頂部以大圖示 + 稱號 + 進度條 (到下一等級) 顯示
+- 在 StatsPage 頂部以大圖示 + 等級名 + 到下一等級的進度條顯示
+- 進度條用海洋綠色漸層
+- 用 anime.js 做等級圖示的入場浮動動畫
 
-2. **成就徽章**：達成特定條件解鎖
-   - 「初タスク」：完成第一個任務
-   - 「三日坊主卒業」：streak 達 3 天
-   - 「一週間の戦士」：streak 達 7 天
-   - 「百戦錬磨」：累積完成 100 個任務
-   用灰色（未解鎖）和彩色（已解鎖）圖示顯示
+### 成就徽章（海洋版）
+- 🐚 初めての一歩：完成第一個任務
+- 🌊 三日坊主卒業：streak 3 天
+- 🏄 波乗りマスター：streak 7 天
+- ⚓ 百戦錬磨：累積 100 個
+- 用 glassmorphism 卡片展示，未解鎖的灰色 + 鎖頭
 
-3. **空狀態激勵**：沒有資料時顯示「まだデータがありません。タスクを完成させて統計を作りましょう！🚀」
+### 所有圖表顏色
+- 圓形進度條：海洋綠 `#0ea5e9`
+- Bar chart：漸層 `#0ea5e9` → `#06b6d4`
+- 空狀態：「まだデータがありません。タスクを完成させて海の冒険を始めましょう！🐙」
 
 ## 任務 B：Pomodoro 計時器
 
-### 設計
 建立 `src/app/components/PomodoroTimer.tsx`：
-- 一個可折疊的浮動元件，固定在右下角（FAB 上方）
-- 預設 25 分鐘工作 / 5 分鐘休息
-- 顯示圓形進度 (SVG circle) + 剩餘時間
-- 開始/暫停/重置按鈕
-- 時間到時播放瀏覽器通知 + 視覺提示
-- 可選擇關聯一個 todo（計時完成後自動標記完成）
+- 浮動元件，固定在畫面右下角（FAB 上方）
+- 外觀：glassmorphism 圓形，像一個水中泡泡
+- 用 SVG circle 畫圓形進度
+- 顏色：工作模式 `#0ea5e9`，休息模式 `#06b6d4`
+- 時間到時用 anime.js 做泡泡爆裂動畫
+- 可最小化為一個小圓形 icon
 
-### 整合
-- 在 `src/app/App.tsx` 或共用的 layout 中加入 PomodoroTimer
-- 使用 lucide-react 的 `Timer` icon
-
-## 任務 C：看板拖拽改善
+## 任務 C：看板頁面改善
 
 在 `KanbanPage.tsx` 中：
-1. 任務卡片加入 swipe-to-complete 手勢（向右滑動完成）
-2. 每欄加一個「+」按鈕，可直接新增該優先度的任務
-3. 欄位標題旁加上對應顏色的圓點指示器
+1. 欄位標題用海洋色系指示器
+2. 卡片改為 glassmorphism 風格
+3. 用 anime.js 做卡片入場的交錯動畫（stagger）
+4. 完成動畫：卡片像氣泡一樣向上飄走
 
 ## PM 文件
-建立 `PM_Guide/codex_pro_stats_pomodoro.md`，記錄你的設計決策。
+建立 `PM_Guide/codex_pro_ocean_stats_pomodoro.md`
 
 ## Git
 ```
-feat: add gamification stats, Pomodoro timer, and kanban improvements
+feat: add ocean level system, Pomodoro timer, and kanban improvements
 ```
-
-## 注意事項
-- 不要碰 `AddTodoDialog.tsx`（Cursor Pro 正在改）
-- 不要碰 `BottomNav.tsx`（不需要新增 tab）
-- 所有圖表用純 CSS/SVG + Framer Motion
