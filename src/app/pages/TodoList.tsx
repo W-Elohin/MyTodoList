@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Todo, TodoCategory, SubTask } from '../types';
 import { storage } from '../utils/storage';
 import { getNextOccurrence, getRecurrenceLabel } from '../utils/recurrence';
+import { cancelReminder, scheduleReminder } from '../utils/reminder';
 import { AddTodoDialog } from '../components/AddTodoDialog';
 import { BackgroundAnimation } from '../components/BackgroundAnimation';
 import { BottomNav } from '../components/BottomNav';
@@ -125,6 +126,7 @@ export function TodoList() {
     const allTodos = storage.getTodos();
     const updated = [newTodo, ...allTodos];
     storage.saveTodos(updated);
+    scheduleReminder(newTodo);
     setTodos(updated.filter((t) => !t.completed));
     window.dispatchEvent(new Event('storage'));
   };
@@ -154,6 +156,12 @@ export function TodoList() {
     }
 
     storage.saveTodos(updated);
+    const changedTodo = updated.find((todo) => todo.id === id);
+    if (changedTodo?.completed) {
+      cancelReminder(id);
+    } else if (changedTodo) {
+      scheduleReminder(changedTodo);
+    }
     setTodos(updated.filter((t) => !t.completed));
     window.dispatchEvent(new Event('storage'));
   };
@@ -162,6 +170,7 @@ export function TodoList() {
     const allTodos = storage.getTodos();
     const updated = allTodos.filter((t) => t.id !== id);
     storage.saveTodos(updated);
+    cancelReminder(id);
     setTodos(updated.filter((t) => !t.completed));
     window.dispatchEvent(new Event('storage'));
   };
@@ -176,6 +185,7 @@ export function TodoList() {
     const allTodos = storage.getTodos();
     const updated = allTodos.map((t) => (t.id === updatedTodo.id ? updatedTodo : t));
     storage.saveTodos(updated);
+    scheduleReminder(updatedTodo);
     setTodos(updated.filter((t) => !t.completed));
     setEditingTodo(null);
     window.dispatchEvent(new Event('storage'));

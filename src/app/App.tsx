@@ -3,6 +3,7 @@ import { Toaster } from 'sonner';
 import { router } from './routes';
 import { useEffect } from 'react';
 import { registerServiceWorker } from './utils/pwa-register';
+import { initReminderService } from './utils/reminder';
 import { useUpdateCheck } from './hooks/useUpdateCheck';
 import { UpdatePrompt } from './components/UpdatePrompt';
 
@@ -11,6 +12,7 @@ export default function App() {
 
   useEffect(() => {
     registerServiceWorker();
+    initReminderService();
   }, []);
 
   return (
