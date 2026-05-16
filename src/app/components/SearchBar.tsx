@@ -23,7 +23,7 @@ export function SearchBar({ value, onChange }: SearchBarProps) {
           type="search"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="搜尋任務、分類、標籤..."
+          placeholder="タスク・カテゴリー・タグを検索..."
           className="flex-1 bg-transparent text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none min-w-0"
         />
         {value && (

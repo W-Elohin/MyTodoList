@@ -10,10 +10,10 @@ interface FilterChipsProps {
 }
 
 const PRIORITY_CHIPS: { value: FilterValue; label: string; color?: string }[] = [
-  { value: 'all', label: '全部' },
-  { value: 'high', label: '高優先', color: '#ef4444' },
-  { value: 'medium', label: '中優先', color: '#eab308' },
-  { value: 'low', label: '低優先', color: '#22c55e' },
+  { value: 'all', label: 'すべて' },
+  { value: 'high', label: '高', color: '#ef4444' },
+  { value: 'medium', label: '中', color: '#eab308' },
+  { value: 'low', label: '低', color: '#22c55e' },
 ];
 
 export function FilterChips({ categories, activeFilter, onFilterChange }: FilterChipsProps) {

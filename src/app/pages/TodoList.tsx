@@ -12,6 +12,7 @@ import { BottomNav } from '../components/BottomNav';
 import { SearchBar, highlightText } from '../components/SearchBar';
 import { FilterChips, FilterValue } from '../components/FilterChips';
 import { SubTaskList } from '../components/SubTaskList';
+import { useConfetti } from '../hooks/useConfetti';
 
 export function TodoList() {
   const navigate = useNavigate();
@@ -22,6 +23,7 @@ export function TodoList() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterValue>('all');
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const confetti = useConfetti();
 
   useEffect(() => {
     setTodos(storage.getTodos().filter((t) => !t.completed));
@@ -131,10 +133,17 @@ export function TodoList() {
     window.dispatchEvent(new Event('storage'));
   };
 
-  const handleToggleComplete = (id: string) => {
+  const handleToggleComplete = (id: string, e?: React.MouseEvent) => {
     const allTodos = storage.getTodos();
     const target = allTodos.find((t) => t.id === id);
     if (!target || target.completed) return;
+
+    // 🎉 Celebrate!
+    if (e) {
+      confetti.fire(e.clientX, e.clientY);
+    } else {
+      confetti.fire();
+    }
 
     let updated = allTodos.map((t) =>
       t.id === id ? { ...t, completed: true, completedAt: Date.now() } : t
@@ -243,8 +252,8 @@ export function TodoList() {
                 >
                   <motion.div layout className="flex items-start gap-4">
                     <button
-                      onClick={() => handleToggleComplete(todo.id)}
-                      className="flex-shrink-0 w-6 h-6 rounded-full border-2 border-gray-300 hover:border-blue-400 transition-all mt-1"
+                      onClick={(e) => handleToggleComplete(todo.id, e)}
+                      className="flex-shrink-0 w-6 h-6 rounded-full border-2 border-gray-300 hover:border-blue-400 hover:bg-blue-50 transition-all mt-1"
                     />
 
                     <div className="flex-1 min-w-0">
@@ -304,7 +313,7 @@ export function TodoList() {
                             onClick={() => setExpandedId(expandedId === todo.id ? null : todo.id)}
                             className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-gray-100 text-gray-600 text-xs hover:bg-gray-200 transition-colors"
                           >
-                            {todo.subtasks.filter((s) => s.completed).length}/{todo.subtasks.length} 完成
+                            {todo.subtasks.filter((s) => s.completed).length}/{todo.subtasks.length}
                             {expandedId === todo.id ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
                           </button>
                         )}
