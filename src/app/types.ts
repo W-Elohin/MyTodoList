@@ -4,6 +4,14 @@ export interface TodoCategory {
   color: string;
 }
 
+export type RecurrenceType = 'daily' | 'weekly' | 'monthly' | 'weekdays' | 'custom';
+
+export interface TodoRecurrence {
+  type: RecurrenceType;
+  interval?: number;
+  daysOfWeek?: number[];
+}
+
 export interface Todo {
   id: string;
   content: string;
@@ -13,6 +21,7 @@ export interface Todo {
   category?: TodoCategory;
   priority?: 'low' | 'medium' | 'high'; // 優先度
   tags?: TodoCategory[]; // 複数タグ
+  recurrence?: TodoRecurrence;
   completed: boolean;
   createdAt: number;
   completedAt?: number;

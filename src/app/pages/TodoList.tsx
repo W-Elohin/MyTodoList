@@ -1,12 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router';
-import { Plus, Folder, Pencil } from 'lucide-react';
+import { Plus, Folder, Pencil, Repeat } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Todo, TodoCategory } from '../types';
 import { storage } from '../utils/storage';
+import { getNextOccurrence, getRecurrenceLabel } from '../utils/recurrence';
 import { AddTodoDialog } from '../components/AddTodoDialog';
 import { BackgroundAnimation } from '../components/BackgroundAnimation';
 import { BottomNav } from '../components/BottomNav';
+import { SearchBar, highlightText } from '../components/SearchBar';
+import { FilterChips, FilterValue } from '../components/FilterChips';
 
 export function TodoList() {
   const navigate = useNavigate();
@@ -14,11 +17,41 @@ export function TodoList() {
   const [categories, setCategories] = useState<TodoCategory[]>([]);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeFilter, setActiveFilter] = useState<FilterValue>('all');
 
   useEffect(() => {
     setTodos(storage.getTodos().filter((t) => !t.completed));
     setCategories(storage.getCategories());
   }, []);
+
+  const filteredTodos = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+
+    return todos.filter((todo) => {
+      if (activeFilter !== 'all') {
+        if (activeFilter === 'high' || activeFilter === 'medium' || activeFilter === 'low') {
+          if (todo.priority !== activeFilter) return false;
+        } else if (activeFilter.startsWith('cat-')) {
+          const catId = activeFilter.slice(4);
+          if (todo.category?.id !== catId) return false;
+        }
+      }
+
+      if (!q) return true;
+
+      const haystack = [
+        todo.content,
+        todo.category?.name,
+        ...(todo.tags?.map((t) => t.name) ?? []),
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+
+      return haystack.includes(q);
+    });
+  }, [todos, searchQuery, activeFilter]);
 
   const handleAddTodo = (todoData: {
     content: string;
@@ -28,6 +61,7 @@ export function TodoList() {
     category?: TodoCategory;
     priority?: 'low' | 'medium' | 'high';
     tags?: TodoCategory[];
+    recurrence?: Todo['recurrence'];
   }) => {
     const newTodo: Todo = {
       id: Date.now().toString(),
@@ -38,6 +72,7 @@ export function TodoList() {
       category: todoData.category,
       priority: todoData.priority,
       tags: todoData.tags,
+      recurrence: todoData.recurrence,
       completed: false,
       createdAt: Date.now(),
     };
@@ -46,22 +81,35 @@ export function TodoList() {
     const updated = [newTodo, ...allTodos];
     storage.saveTodos(updated);
     setTodos(updated.filter((t) => !t.completed));
-    
-    // storageイベントを発火して他のタブに通知
     window.dispatchEvent(new Event('storage'));
   };
 
   const handleToggleComplete = (id: string) => {
     const allTodos = storage.getTodos();
-    const updated = allTodos.map((t) =>
-      t.id === id
-        ? { ...t, completed: !t.completed, completedAt: !t.completed ? Date.now() : undefined }
-        : t
+    const target = allTodos.find((t) => t.id === id);
+    if (!target || target.completed) return;
+
+    let updated = allTodos.map((t) =>
+      t.id === id ? { ...t, completed: true, completedAt: Date.now() } : t
     );
+
+    if (target.recurrence) {
+      const nextDate = getNextOccurrence(target);
+      if (nextDate) {
+        const nextTodo: Todo = {
+          ...target,
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          date: nextDate,
+          completed: false,
+          completedAt: undefined,
+          createdAt: Date.now(),
+        };
+        updated = [nextTodo, ...updated];
+      }
+    }
+
     storage.saveTodos(updated);
     setTodos(updated.filter((t) => !t.completed));
-    
-    // storageイベントを発火して他のタブに通知
     window.dispatchEvent(new Event('storage'));
   };
 
@@ -70,8 +118,6 @@ export function TodoList() {
     const updated = allTodos.filter((t) => t.id !== id);
     storage.saveTodos(updated);
     setTodos(updated.filter((t) => !t.completed));
-    
-    // storageイベントを発火して他のタブに通知
     window.dispatchEvent(new Event('storage'));
   };
 
@@ -95,8 +141,7 @@ export function TodoList() {
       <BackgroundAnimation />
 
       <div className="max-w-md mx-auto px-4 pt-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-4">
           <h1 className="text-3xl font-bold text-gray-800">ToDoリスト</h1>
           <button
             onClick={() => navigate('/archive')}
@@ -106,20 +151,32 @@ export function TodoList() {
           </button>
         </div>
 
-        {/* Todo List */}
-        <div className="space-y-4 mb-6">
+        <SearchBar value={searchQuery} onChange={setSearchQuery} />
+        <FilterChips
+          categories={categories}
+          activeFilter={activeFilter}
+          onFilterChange={setActiveFilter}
+        />
+
+        <div className="space-y-4 mb-6 mt-2">
           <AnimatePresence mode="popLayout">
-            {todos.length === 0 ? (
+            {filteredTodos.length === 0 ? (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="text-center py-16 text-gray-400"
               >
-                <p className="text-lg">ToDoがありません</p>
-                <p className="text-sm mt-2">右下のボタンから追加してください</p>
+                <p className="text-lg">
+                  {todos.length === 0 ? 'ToDoがありません' : '該当するToDoがありません'}
+                </p>
+                <p className="text-sm mt-2">
+                  {todos.length === 0
+                    ? '右下のボタンから追加してください'
+                    : '検索またはフィルターを変更してください'}
+                </p>
               </motion.div>
             ) : (
-              todos.map((todo, index) => (
+              filteredTodos.map((todo, index) => (
                 <motion.div
                   key={todo.id}
                   layout
@@ -128,41 +185,29 @@ export function TodoList() {
                   exit={{ opacity: 0, x: -100 }}
                   transition={{ delay: index * 0.05 }}
                   className="bg-white backdrop-blur-sm rounded-2xl p-5 shadow-lg hover:shadow-xl transition-all"
-                  style={{
-                    background: '#FFFFFF',
-                  }}
                 >
-                  <div className="flex items-start gap-4">
+                  <motion.div layout className="flex items-start gap-4">
                     <button
                       onClick={() => handleToggleComplete(todo.id)}
-                      className={`flex-shrink-0 w-6 h-6 rounded-full border-2 transition-all mt-1 ${
-                        todo.completed
-                          ? 'bg-blue-500 border-blue-500'
-                          : 'border-gray-300 hover:border-blue-400'
-                      }`}
-                    >
-                      {todo.completed && (
-                        <svg
-                          className="w-full h-full text-white"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={3}
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
-                      )}
-                    </button>
+                      className="flex-shrink-0 w-6 h-6 rounded-full border-2 border-gray-300 hover:border-blue-400 transition-all mt-1"
+                    />
 
                     <div className="flex-1 min-w-0">
-                      <p className="text-base mb-2 break-words text-gray-800">{todo.content}</p>
+                      <p className="text-base mb-2 break-words text-gray-800">
+                        {highlightText(todo.content, searchQuery)}
+                      </p>
                       <div className="flex flex-wrap items-center gap-2 text-sm text-gray-700">
                         <span>{todo.date}</span>
                         <span>{todo.time}</span>
+                        {todo.recurrence && (
+                          <span
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-blue-50 text-blue-600 text-xs"
+                            title={getRecurrenceLabel(todo.recurrence)}
+                          >
+                            <Repeat size={12} />
+                            {getRecurrenceLabel(todo.recurrence)}
+                          </span>
+                        )}
                         {todo.category && (
                           <span
                             className="px-3 py-1 rounded-xl text-xs font-medium"
@@ -171,7 +216,7 @@ export function TodoList() {
                               color: todo.category.color === '#F4F0ED' ? '#000' : '#fff',
                             }}
                           >
-                            {todo.category.name}
+                            {highlightText(todo.category.name, searchQuery)}
                           </span>
                         )}
                         {todo.priority && (
@@ -186,14 +231,15 @@ export function TodoList() {
                           >
                             優先度: {todo.priority === 'high' ? '高' : todo.priority === 'medium' ? '中' : '低'}
                           </span>
+                        )}
                         {todo.tags && todo.tags.length > 0 && (
                           <div className="flex gap-1 flex-wrap">
-                            {todo.tags.map(tag => (
+                            {todo.tags.map((tag) => (
                               <span
                                 key={`list-tag-${tag.id}`}
                                 className="px-2 py-0.5 rounded-md text-[10px] font-medium border border-gray-200 text-gray-500"
                               >
-                                #{tag.name}
+                                #{highlightText(tag.name, searchQuery)}
                               </span>
                             ))}
                           </div>
@@ -212,22 +258,22 @@ export function TodoList() {
                         onClick={() => handleDeleteTodo(todo.id)}
                         className="flex-shrink-0 text-red-400 hover:text-red-600 transition-colors p-1"
                       >
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
                       </button>
                     </div>
-                  </div>
+                  </motion.div>
                 </motion.div>
               ))
             )}
@@ -235,7 +281,6 @@ export function TodoList() {
         </div>
       </div>
 
-      {/* Add Button */}
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
