@@ -244,6 +244,7 @@ export function TimelinePage() {
                           <div className="font-medium text-white truncate">{todo.content}</div>
                           <div className="text-[10px] text-white/90">
                             {todo.time} ({todo.duration || 30}分)
+                            {todo.priority && ` [${todo.priority === 'high' ? '高' : todo.priority === 'medium' ? '中' : '低'}]`}
                           </div>
                         </motion.div>
                       ) : (

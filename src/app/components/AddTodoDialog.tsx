@@ -13,6 +13,7 @@ interface AddTodoDialogProps {
     time: string;
     duration?: number;
     category?: TodoCategory;
+    priority?: 'low' | 'medium' | 'high';
   }) => void;
   onEdit?: (todo: Todo) => void;
   editingTodo?: Todo | null;
@@ -34,6 +35,7 @@ export function AddTodoDialog({
   const [time, setTime] = useState(getLocalTimeString());
   const [duration, setDuration] = useState(30); // デフォルト30分
   const [selectedCategory, setSelectedCategory] = useState<TodoCategory | undefined>();
+  const [priority, setPriority] = useState<'low' | 'medium' | 'high' | undefined>();
   const [showCategoryInput, setShowCategoryInput] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryColor, setNewCategoryColor] = useState('#81DDE6');
@@ -51,12 +53,14 @@ export function AddTodoDialog({
         setTime(editingTodo.time);
         setDuration(editingTodo.duration ?? 30);
         setSelectedCategory(editingTodo.category);
+        setPriority(editingTodo.priority);
       } else {
         setContent('');
         setDate(getLocalDateString());
         setTime(getLocalTimeString());
         setDuration(30);
         setSelectedCategory(undefined);
+        setPriority(undefined);
       }
       setShowCategoryInput(false);
     }
@@ -73,12 +77,14 @@ export function AddTodoDialog({
           time,
           duration,
           category: selectedCategory,
+          priority,
         });
       } else {
-        onAdd({ content, date, time, duration, category: selectedCategory });
+        onAdd({ content, date, time, duration, category: selectedCategory, priority });
       }
       setContent('');
       setSelectedCategory(undefined);
+      setPriority(undefined);
       onClose();
     }
   };
@@ -256,6 +262,28 @@ export function AddTodoDialog({
                       </button>
                     </motion.div>
                   )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-gray-700">優先度</label>
+                  <div className="flex gap-2">
+                    {(['low', 'medium', 'high'] as const).map((p) => (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => setPriority(priority === p ? undefined : p)}
+                        className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                          priority === p
+                            ? p === 'high' ? 'bg-red-500 text-white ring-2 ring-offset-2 ring-red-400 scale-105'
+                            : p === 'medium' ? 'bg-yellow-500 text-white ring-2 ring-offset-2 ring-yellow-400 scale-105'
+                            : 'bg-green-500 text-white ring-2 ring-offset-2 ring-green-400 scale-105'
+                            : 'bg-gray-100 text-gray-600 hover:scale-105'
+                        }`}
+                      >
+                        {p === 'high' ? '高' : p === 'medium' ? '中' : '低'}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 <button

@@ -259,6 +259,19 @@ export function Archive() {
                                   {todo.category.name}
                                 </span>
                               )}
+                              {todo.priority && (
+                                <span
+                                  className={`px-3 py-1 rounded-xl text-xs font-medium text-white ${
+                                    todo.priority === 'high'
+                                      ? 'bg-red-500'
+                                      : todo.priority === 'medium'
+                                      ? 'bg-yellow-500'
+                                      : 'bg-green-500'
+                                  }`}
+                                >
+                                  優先度: {todo.priority === 'high' ? '高' : todo.priority === 'medium' ? '中' : '低'}
+                                </span>
+                              )}
                             </div>
                           </div>
 

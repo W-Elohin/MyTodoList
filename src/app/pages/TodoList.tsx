@@ -26,6 +26,7 @@ export function TodoList() {
     time: string;
     duration?: number;
     category?: TodoCategory;
+    priority?: 'low' | 'medium' | 'high';
   }) => {
     const newTodo: Todo = {
       id: Date.now().toString(),
@@ -34,6 +35,7 @@ export function TodoList() {
       time: todoData.time,
       duration: todoData.duration,
       category: todoData.category,
+      priority: todoData.priority,
       completed: false,
       createdAt: Date.now(),
     };
@@ -168,6 +170,19 @@ export function TodoList() {
                             }}
                           >
                             {todo.category.name}
+                          </span>
+                        )}
+                        {todo.priority && (
+                          <span
+                            className={`px-3 py-1 rounded-xl text-xs font-medium text-white ${
+                              todo.priority === 'high'
+                                ? 'bg-red-500'
+                                : todo.priority === 'medium'
+                                ? 'bg-yellow-500'
+                                : 'bg-green-500'
+                            }`}
+                          >
+                            優先度: {todo.priority === 'high' ? '高' : todo.priority === 'medium' ? '中' : '低'}
                           </span>
                         )}
                       </div>
