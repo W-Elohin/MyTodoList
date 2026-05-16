@@ -11,6 +11,7 @@ export interface Todo {
   time: string;
   duration?: number; // 持続時間（分単位）
   category?: TodoCategory;
+  tags?: TodoCategory[]; // 複数タグ
   completed: boolean;
   createdAt: number;
   completedAt?: number;

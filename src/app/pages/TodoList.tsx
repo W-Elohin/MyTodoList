@@ -26,6 +26,7 @@ export function TodoList() {
     time: string;
     duration?: number;
     category?: TodoCategory;
+    tags?: TodoCategory[];
   }) => {
     const newTodo: Todo = {
       id: Date.now().toString(),
@@ -34,6 +35,7 @@ export function TodoList() {
       time: todoData.time,
       duration: todoData.duration,
       category: todoData.category,
+      tags: todoData.tags,
       completed: false,
       createdAt: Date.now(),
     };
@@ -169,6 +171,18 @@ export function TodoList() {
                           >
                             {todo.category.name}
                           </span>
+                        )}
+                        {todo.tags && todo.tags.length > 0 && (
+                          <div className="flex gap-1 flex-wrap">
+                            {todo.tags.map(tag => (
+                              <span
+                                key={`list-tag-${tag.id}`}
+                                className="px-2 py-0.5 rounded-md text-[10px] font-medium border border-gray-200 text-gray-500"
+                              >
+                                #{tag.name}
+                              </span>
+                            ))}
+                          </div>
                         )}
                       </div>
                     </div>
