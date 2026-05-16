@@ -14,6 +14,7 @@ interface AddTodoDialogProps {
     duration?: number;
     category?: TodoCategory;
     priority?: 'low' | 'medium' | 'high';
+    tags?: TodoCategory[];
   }) => void;
   onEdit?: (todo: Todo) => void;
   editingTodo?: Todo | null;
@@ -36,6 +37,7 @@ export function AddTodoDialog({
   const [duration, setDuration] = useState(30); // デフォルト30分
   const [selectedCategory, setSelectedCategory] = useState<TodoCategory | undefined>();
   const [priority, setPriority] = useState<'low' | 'medium' | 'high' | undefined>();
+  const [selectedTags, setSelectedTags] = useState<TodoCategory[]>([]);
   const [showCategoryInput, setShowCategoryInput] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryColor, setNewCategoryColor] = useState('#81DDE6');
@@ -54,6 +56,7 @@ export function AddTodoDialog({
         setDuration(editingTodo.duration ?? 30);
         setSelectedCategory(editingTodo.category);
         setPriority(editingTodo.priority);
+        setSelectedTags(editingTodo.tags || []);
       } else {
         setContent('');
         setDate(getLocalDateString());
@@ -61,6 +64,7 @@ export function AddTodoDialog({
         setDuration(30);
         setSelectedCategory(undefined);
         setPriority(undefined);
+        setSelectedTags([]);
       }
       setShowCategoryInput(false);
     }
@@ -78,13 +82,15 @@ export function AddTodoDialog({
           duration,
           category: selectedCategory,
           priority,
+          tags: selectedTags.length > 0 ? selectedTags : undefined,
         });
       } else {
-        onAdd({ content, date, time, duration, category: selectedCategory, priority });
+        onAdd({ content, date, time, duration, category: selectedCategory, priority, tags: selectedTags.length > 0 ? selectedTags : undefined });
       }
       setContent('');
       setSelectedCategory(undefined);
       setPriority(undefined);
+      setSelectedTags([]);
       onClose();
     }
   };
@@ -283,6 +289,35 @@ export function AddTodoDialog({
                         {p === 'high' ? '高' : p === 'medium' ? '中' : '低'}
                       </button>
                     ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-gray-700">タグ (複数選択可)</label>
+                  <div className="flex flex-wrap gap-2">
+                    {categories.map((tag) => {
+                      const isSelected = selectedTags.some(t => t.id === tag.id);
+                      return (
+                        <button
+                          key={`tag-${tag.id}`}
+                          type="button"
+                          onClick={() => {
+                            if (isSelected) {
+                              setSelectedTags(selectedTags.filter(t => t.id !== tag.id));
+                            } else {
+                              setSelectedTags([...selectedTags, tag]);
+                            }
+                          }}
+                          className={`px-3 py-1 rounded-full text-xs font-medium transition-all border ${
+                            isSelected
+                              ? 'bg-blue-100 text-blue-800 border-blue-300 shadow-sm'
+                              : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                          }`}
+                        >
+                          # {tag.name}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 

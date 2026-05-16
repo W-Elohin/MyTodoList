@@ -27,6 +27,7 @@ export function TodoList() {
     duration?: number;
     category?: TodoCategory;
     priority?: 'low' | 'medium' | 'high';
+    tags?: TodoCategory[];
   }) => {
     const newTodo: Todo = {
       id: Date.now().toString(),
@@ -36,6 +37,7 @@ export function TodoList() {
       duration: todoData.duration,
       category: todoData.category,
       priority: todoData.priority,
+      tags: todoData.tags,
       completed: false,
       createdAt: Date.now(),
     };
@@ -184,6 +186,17 @@ export function TodoList() {
                           >
                             優先度: {todo.priority === 'high' ? '高' : todo.priority === 'medium' ? '中' : '低'}
                           </span>
+                        {todo.tags && todo.tags.length > 0 && (
+                          <div className="flex gap-1 flex-wrap">
+                            {todo.tags.map(tag => (
+                              <span
+                                key={`list-tag-${tag.id}`}
+                                className="px-2 py-0.5 rounded-md text-[10px] font-medium border border-gray-200 text-gray-500"
+                              >
+                                #{tag.name}
+                              </span>
+                            ))}
+                          </div>
                         )}
                       </div>
                     </div>
