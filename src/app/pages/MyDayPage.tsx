@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { Plus, Sun, Pencil, Folder } from 'lucide-react';
+import { Plus, Pencil, Folder } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Todo, TodoCategory } from '../types';
 import { storage } from '../utils/storage';
 import { getLocalDateString } from '../utils/date';
+import { getGreeting } from '../utils/greeting';
+import { GreetingEmoji } from '../components/GreetingEmoji';
+import { EmptyStateWrapper } from '../components/illustrations/EmptyStateWrapper';
+import { TurtleIllustration } from '../components/illustrations/TurtleIllustration';
 import { AddTodoDialog } from '../components/AddTodoDialog';
 import { BackgroundAnimation } from '../components/BackgroundAnimation';
 import { BottomNav } from '../components/BottomNav';
@@ -30,7 +34,7 @@ export function MyDayPage() {
     };
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('focus', handleStorageChange);
-    
+
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('focus', handleStorageChange);
@@ -58,8 +62,6 @@ export function MyDayPage() {
     const allTodos = storage.getTodos();
     const updated = [newTodo, ...allTodos];
     storage.saveTodos(updated);
-    
-    // storageイベントを発火して他のタブに通知
     window.dispatchEvent(new Event('storage'));
     loadTodos();
   };
@@ -76,19 +78,18 @@ export function MyDayPage() {
     loadTodos();
   };
 
-  const handleDeleteTodo = (id: string) => {
-    const allTodos = storage.getTodos();
-    const updated = allTodos.filter((t) => t.id !== id);
-    storage.saveTodos(updated);
-    window.dispatchEvent(new Event('storage'));
-    loadTodos();
-  };
-
   const handleAddCategory = (category: TodoCategory) => {
     const updatedCategories = [...categories, category];
     setCategories(updatedCategories);
     storage.saveCategories(updatedCategories);
   };
+
+  const todayStr = getLocalDateString();
+  const todayAll = storage.getTodos().filter((t) => t.date === todayStr);
+  const todayCompleted = todayAll.filter((t) => t.completed).length;
+  const todayTotal = todayAll.length;
+  const progress = todayTotal > 0 ? (todayCompleted / todayTotal) * 100 : 0;
+  const greeting = getGreeting();
 
   const handleEditTodo = (updatedTodo: Todo) => {
     const allTodos = storage.getTodos();
@@ -100,36 +101,60 @@ export function MyDayPage() {
   };
 
   return (
-    <div className="min-h-screen pb-24" style={{ backgroundColor: '#F4F0ED' }}>
+    <motion.div className="min-h-screen pb-24" style={{ backgroundColor: '#F4F0ED' }}>
       <BackgroundAnimation />
 
-      <div className="max-w-md mx-auto px-4 pt-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <Sun size={32} className="text-yellow-500" />
-            <h1 className="text-3xl font-bold text-gray-800">今日</h1>
-          </div>
+      <motion.div className="max-w-md mx-auto px-4 pt-8">
+        <motion.div className="flex items-start justify-between mb-6">
+          <motion.div>
+            <motion.div className="flex items-center gap-3 mb-1">
+              <GreetingEmoji emoji={greeting.emoji} />
+              <h1 className="text-2xl font-bold text-sky-50">{greeting.text}</h1>
+            </motion.div>
+            <p className="text-sm text-sky-300 ml-1">{greeting.sub}</p>
+          </motion.div>
           <button
+            type="button"
             onClick={() => navigate('/archive')}
-            className="p-3 bg-white/60 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all"
+            className="p-3 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/15 hover:bg-white/15 transition-all text-sky-200"
           >
             <Folder size={24} />
           </button>
-        </div>
+        </motion.div>
 
-        {/* Todo List */}
-        <div className="space-y-4 mb-6">
+        {todayTotal > 0 ? (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 p-4 rounded-2xl bg-white/[0.08] border border-white/15 backdrop-blur-md"
+          >
+            <motion.div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-sky-200">
+                今日の進捗 {todayCompleted}/{todayTotal}
+              </span>
+              <span className="text-sm font-medium text-sky-100">{Math.round(progress)}%</span>
+            </motion.div>
+            <motion.div className="h-2 rounded-full bg-white/10 overflow-hidden">
+              <motion.div
+                className="h-full rounded-full bg-gradient-to-r from-sky-500 to-emerald-400"
+                initial={{ width: 0 }}
+                animate={{ width: `${progress}%` }}
+                transition={{ duration: 0.6, ease: 'easeOut' }}
+              />
+            </motion.div>
+          </motion.div>
+        ) : (
+          <p className="text-sm text-sky-400 mb-6">まだ予定がありません</p>
+        )}
+
+        <motion.div className="space-y-4 mb-6">
           <AnimatePresence mode="popLayout">
             {todos.length === 0 ? (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-center py-16 text-gray-400"
-              >
-                <p className="text-lg">今日のToDoがありません</p>
-                <p className="text-sm mt-2">素晴らしい一日にしましょう！</p>
-              </motion.div>
+              <EmptyStateWrapper
+                illustration={<TurtleIllustration />}
+                title="今日のタスクはありません"
+                subtitle="のんびりしましょう！"
+              />
             ) : (
               todos.map((todo, index) => (
                 <motion.div
@@ -139,37 +164,17 @@ export function MyDayPage() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -100 }}
                   transition={{ delay: index * 0.05 }}
-                  className="bg-white backdrop-blur-sm rounded-2xl p-5 shadow-lg hover:shadow-xl transition-all"
+                  className="bg-white/10 backdrop-blur-sm rounded-2xl p-5 shadow-lg border border-white/15 hover:border-white/25 transition-colors"
                 >
-                  <div className="flex items-start gap-4">
+                  <motion.div className="flex items-start gap-4">
                     <button
+                      type="button"
                       onClick={() => handleToggleComplete(todo.id)}
-                      className={`flex-shrink-0 w-6 h-6 rounded-full border-2 transition-all mt-1 ${
-                        todo.completed
-                          ? 'bg-blue-500 border-blue-500'
-                          : 'border-gray-300 hover:border-blue-400'
-                      }`}
-                    >
-                      {todo.completed && (
-                        <svg
-                          className="w-full h-full text-white"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={3}
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
-                      )}
-                    </button>
-
-                    <div className="flex-1 min-w-0">
-                      <p className="text-base mb-2 break-words text-gray-800">{todo.content}</p>
-                      <div className="flex flex-wrap items-center gap-2 text-sm text-gray-700">
+                      className="flex-shrink-0 w-6 h-6 rounded-full border-2 border-white/30 hover:border-sky-400 transition-all mt-1"
+                    />
+                    <motion.div className="flex-1 min-w-0">
+                      <p className="text-base mb-2 break-words text-sky-50">{todo.content}</p>
+                      <motion.div className="flex flex-wrap items-center gap-2 text-sm text-sky-300">
                         <span>{todo.time}</span>
                         {todo.category && (
                           <span
@@ -182,26 +187,23 @@ export function MyDayPage() {
                             {todo.category.name}
                           </span>
                         )}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={() => setEditingTodo(todo)}
-                        className="flex-shrink-0 text-gray-500 hover:text-gray-700 transition-colors p-1"
-                      >
-                        <Pencil size={18} />
-                      </button>
-                    </div>
-                  </div>
+                      </motion.div>
+                    </motion.div>
+                    <button
+                      type="button"
+                      onClick={() => setEditingTodo(todo)}
+                      className="flex-shrink-0 text-sky-400 hover:text-sky-200 transition-colors p-1"
+                    >
+                      <Pencil size={18} />
+                    </button>
+                  </motion.div>
                 </motion.div>
               ))
             )}
           </AnimatePresence>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
-      {/* Add Button */}
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
@@ -209,9 +211,9 @@ export function MyDayPage() {
           setEditingTodo(null);
           setShowAddDialog(true);
         }}
-        className="fixed bottom-24 right-6 w-16 h-16 rounded-2xl shadow-2xl flex items-center justify-center bg-white"
+        className="fixed bottom-24 right-6 w-16 h-16 rounded-2xl shadow-2xl flex items-center justify-center bg-white/10 border border-white/15"
       >
-        <Plus size={32} style={{ color: '#B5A89E' }} />
+        <Plus size={32} className="text-sky-300" />
       </motion.button>
 
       <AddTodoDialog
@@ -228,6 +230,6 @@ export function MyDayPage() {
       />
 
       <BottomNav />
-    </div>
+    </motion.div>
   );
 }
