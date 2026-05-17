@@ -206,15 +206,15 @@ export function TodoList() {
   };
 
   return (
-    <div className="min-h-screen pb-24" style={{ backgroundColor: '#F4F0ED' }}>
+    <div className="min-h-screen pb-24" style={{ background: 'linear-gradient(180deg, #0a1628 0%, #1e3a5f 50%, #0c4a6e 100%)' }}>
       <BackgroundAnimation />
 
       <div className="max-w-md mx-auto px-4 pt-8">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-3xl font-bold text-gray-800">ToDoリスト</h1>
+          <h1 className="text-3xl font-bold text-sky-50">ToDoリスト</h1>
           <button
             onClick={() => navigate('/archive')}
-            className="p-3 bg-white/60 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all"
+            className="p-3 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/15 hover:bg-white/15 transition-all text-sky-200"
           >
             <Folder size={24} />
           </button>
@@ -255,15 +255,15 @@ export function TodoList() {
                     <TodoCompleteButton onComplete={(e) => handleToggleComplete(todo.id, e)} />
 
                     <div className="flex-1 min-w-0">
-                      <p className="text-base mb-2 break-words text-gray-800">
+                      <p className="text-base mb-2 break-words text-sky-50">
                         {highlightText(todo.content, searchQuery)}
                       </p>
-                      <div className="flex flex-wrap items-center gap-2 text-sm text-gray-700">
+                      <div className="flex flex-wrap items-center gap-2 text-sm text-sky-200">
                         <span>{todo.date}</span>
                         <span>{todo.time}</span>
                         {todo.recurrence && (
                           <span
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-blue-50 text-blue-600 text-xs"
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-sky-500/20 text-sky-300 text-xs"
                             title={getRecurrenceLabel(todo.recurrence)}
                           >
                             <Repeat size={12} />
@@ -299,7 +299,7 @@ export function TodoList() {
                             {todo.tags.map((tag) => (
                               <span
                                 key={`list-tag-${tag.id}`}
-                                className="px-2 py-0.5 rounded-md text-[10px] font-medium border border-gray-200 text-gray-500"
+                                className="px-2 py-0.5 rounded-md text-[10px] font-medium border border-white/15 text-sky-400"
                               >
                                 #{highlightText(tag.name, searchQuery)}
                               </span>
@@ -309,7 +309,7 @@ export function TodoList() {
                         {todo.subtasks && todo.subtasks.length > 0 && (
                           <button
                             onClick={() => setExpandedId(expandedId === todo.id ? null : todo.id)}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-gray-100 text-gray-600 text-xs hover:bg-gray-200 transition-colors"
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white/10 text-sky-300 text-xs hover:bg-white/15 transition-colors"
                           >
                             {todo.subtasks.filter((s) => s.completed).length}/{todo.subtasks.length}
                             {expandedId === todo.id ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
@@ -321,7 +321,7 @@ export function TodoList() {
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => setEditingTodo(todo)}
-                        className="flex-shrink-0 text-gray-500 hover:text-gray-700 transition-colors p-1"
+                        className="flex-shrink-0 text-sky-400 hover:text-sky-200 transition-colors p-1"
                       >
                         <Pencil size={18} />
                       </button>
@@ -338,7 +338,7 @@ export function TodoList() {
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="overflow-hidden mt-3 pt-3 border-t border-gray-100"
+                        className="overflow-hidden mt-3 pt-3 border-t border-white/10"
                       >
                         <SubTaskList
                           subtasks={todo.subtasks ?? []}
@@ -363,9 +363,9 @@ export function TodoList() {
           setEditingTodo(null);
           setShowAddDialog(true);
         }}
-        className="fixed bottom-24 right-6 w-16 h-16 rounded-2xl shadow-2xl flex items-center justify-center bg-white"
+        className="fixed bottom-24 right-6 w-16 h-16 rounded-2xl shadow-2xl flex items-center justify-center bg-white/10 border border-white/20 backdrop-blur-xl"
       >
-        <Plus size={32} style={{ color: '#B5A89E' }} />
+        <Plus size={32} className="text-sky-300" />
       </motion.button>
 
       <AddTodoDialog

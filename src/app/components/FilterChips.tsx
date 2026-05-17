@@ -35,14 +35,14 @@ export function FilterChips({ categories, activeFilter, onFilterChange }: Filter
             className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-medium transition-all border ${
               isActive
                 ? 'shadow-md border-transparent text-white'
-                : 'bg-white/70 text-gray-600 border-gray-200 hover:bg-white'
+                : 'text-sky-300 hover:bg-white/10'
             }`}
             style={
               isActive && chip.color
-                ? { backgroundColor: chip.value === 'all' ? '#2A89C6' : chip.color }
+                ? { backgroundColor: chip.value === 'all' ? '#0ea5e9' : chip.color, borderColor: 'transparent' }
                 : isActive
-                ? { backgroundColor: '#2A89C6' }
-                : undefined
+                ? { backgroundColor: '#0ea5e9', borderColor: 'transparent' }
+                : { background: 'rgba(255,255,255,0.08)', borderColor: 'rgba(255,255,255,0.15)' }
             }
           >
             {chip.label}

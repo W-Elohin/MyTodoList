@@ -27,12 +27,9 @@ export function StatsPage() {
 
   useEffect(() => {
     loadTodos();
-
     const handleStorageChange = () => loadTodos();
-
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('focus', handleStorageChange);
-
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('focus', handleStorageChange);
@@ -45,23 +42,31 @@ export function StatsPage() {
   const today = getLocalDateString();
   const strokeOffset = circumference - (stats.todayCompletionRate / 100) * circumference;
 
+  const glassPanel = {
+    background: 'rgba(255,255,255,0.06)',
+    backdropFilter: 'blur(20px)',
+    WebkitBackdropFilter: 'blur(20px)',
+    border: '1px solid rgba(255,255,255,0.12)',
+  } as const;
+
   return (
-    <div className="min-h-screen pb-24" style={{ backgroundColor: '#F4F0ED' }}>
+    <div className="min-h-screen pb-24" style={{ background: 'linear-gradient(180deg, #0a1628 0%, #1e3a5f 50%, #0c4a6e 100%)' }}>
       <BackgroundAnimation />
 
       <div className="max-w-4xl mx-auto px-4 pt-8">
         <div className="flex items-center gap-3 mb-6">
-          <BarChart3 size={32} className="text-gray-700" />
-          <h1 className="text-3xl font-bold text-gray-800">統計</h1>
+          <BarChart3 size={32} className="text-sky-400" />
+          <h1 className="text-3xl font-bold text-sky-50">統計</h1>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <motion.section
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white/75 backdrop-blur-sm rounded-2xl p-6 shadow-lg"
+            className="rounded-2xl p-6 shadow-lg shadow-black/20"
+            style={glassPanel}
           >
-            <h2 className="font-semibold text-gray-800 mb-5">今日完成率</h2>
+            <h2 className="font-semibold text-sky-100 mb-5">今日完成率</h2>
             <div className="flex items-center justify-center">
               <div className="relative" style={{ width: circleSize, height: circleSize }}>
                 <svg width={circleSize} height={circleSize} className="-rotate-90">
@@ -70,7 +75,7 @@ export function StatsPage() {
                     cy={circleSize / 2}
                     r={radius}
                     fill="none"
-                    stroke="#EEE7E2"
+                    stroke="rgba(255,255,255,0.1)"
                     strokeWidth={strokeWidth}
                   />
                   <motion.circle
@@ -78,7 +83,7 @@ export function StatsPage() {
                     cy={circleSize / 2}
                     r={radius}
                     fill="none"
-                    stroke="#2A89C6"
+                    stroke="#0ea5e9"
                     strokeLinecap="round"
                     strokeWidth={strokeWidth}
                     strokeDasharray={circumference}
@@ -92,11 +97,11 @@ export function StatsPage() {
                     key={stats.todayCompletionRate}
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-4xl font-bold text-gray-800"
+                    className="text-4xl font-bold text-sky-50"
                   >
                     {stats.todayCompletionRate}%
                   </motion.span>
-                  <span className="text-xs text-gray-500 mt-1">
+                  <span className="text-xs text-sky-400 mt-1">
                     {stats.todayCompleted}/{stats.todayTotal}
                   </span>
                 </div>
@@ -108,9 +113,10 @@ export function StatsPage() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.08 }}
-            className="bg-white/75 backdrop-blur-sm rounded-2xl p-6 shadow-lg"
+            className="rounded-2xl p-6 shadow-lg shadow-black/20"
+            style={glassPanel}
           >
-            <h2 className="font-semibold text-gray-800 mb-5">連續天數</h2>
+            <h2 className="font-semibold text-sky-100 mb-5">連続達成</h2>
             <div className="h-[168px] flex flex-col items-center justify-center">
               <motion.div
                 key={stats.streak}
@@ -118,11 +124,11 @@ export function StatsPage() {
                 animate={{ scale: 1, opacity: 1 }}
                 className="flex items-end gap-3"
               >
-                <span className="text-6xl font-bold text-gray-800">{stats.streak}</span>
+                <span className="text-6xl font-bold text-sky-50">{stats.streak}</span>
                 <span className="text-4xl leading-tight">🔥</span>
               </motion.div>
-              <p className="text-sm text-gray-500 mt-3">日連続で達成中</p>
-              <p className="text-xs text-gray-400 mt-2">累計完了 {stats.totalCompleted} 件</p>
+              <p className="text-sm text-sky-400 mt-3">日連続で達成中</p>
+              <p className="text-xs text-sky-500 mt-2">累計完了 {stats.totalCompleted} 件</p>
             </div>
           </motion.section>
         </div>
@@ -131,9 +137,10 @@ export function StatsPage() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.12 }}
-          className="bg-white/75 backdrop-blur-sm rounded-2xl p-6 shadow-lg mb-4"
+          className="rounded-2xl p-6 shadow-lg shadow-black/20 mb-4"
+          style={glassPanel}
         >
-          <h2 className="font-semibold text-gray-800 mb-5">本週トレンド</h2>
+          <h2 className="font-semibold text-sky-100 mb-5">本週トレンド</h2>
           <div className="h-52 flex items-end gap-3">
             {stats.weeklyData.map((day) => {
               const height = Math.max((day.count / maxWeeklyCount) * 150, day.count > 0 ? 14 : 4);
@@ -141,14 +148,15 @@ export function StatsPage() {
 
               return (
                 <div key={day.date} className="flex-1 h-full flex flex-col items-center justify-end gap-2">
-                  <span className="text-xs font-semibold text-gray-600">{day.count}</span>
+                  <span className="text-xs font-semibold text-sky-400">{day.count}</span>
                   <motion.div
                     initial={{ height: 0 }}
                     animate={{ height }}
                     transition={{ duration: 0.6, ease: 'easeOut' }}
-                    className={`w-full max-w-12 rounded-t-xl ${isToday ? 'bg-[#2A89C6]' : 'bg-[#B5A89E]'}`}
+                    className="w-full max-w-12 rounded-t-xl"
+                    style={{ backgroundColor: isToday ? '#0ea5e9' : 'rgba(255,255,255,0.2)' }}
                   />
-                  <span className={`text-[11px] ${isToday ? 'text-[#2A89C6] font-semibold' : 'text-gray-500'}`}>
+                  <span className={`text-[11px] ${isToday ? 'text-sky-300 font-semibold' : 'text-sky-500'}`}>
                     {formatDayLabel(day.date)}
                   </span>
                 </div>
@@ -161,20 +169,21 @@ export function StatsPage() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.16 }}
-          className="bg-white/75 backdrop-blur-sm rounded-2xl p-6 shadow-lg"
+          className="rounded-2xl p-6 shadow-lg shadow-black/20"
+          style={glassPanel}
         >
-          <h2 className="font-semibold text-gray-800 mb-5">分類統計</h2>
+          <h2 className="font-semibold text-sky-100 mb-5">分類統計</h2>
           <div className="space-y-4">
             {stats.categoryBreakdown.length === 0 ? (
-              <p className="text-center text-gray-400 py-8">未完成任務がありません</p>
+              <p className="text-center text-sky-500 py-8">未完成タスクがありません</p>
             ) : (
               stats.categoryBreakdown.map((category) => (
                 <div key={category.name}>
                   <div className="flex items-center justify-between text-sm mb-2">
-                    <span className="font-medium text-gray-700">{category.name}</span>
-                    <span className="text-gray-500">{category.count}</span>
+                    <span className="font-medium text-sky-200">{category.name}</span>
+                    <span className="text-sky-400">{category.count}</span>
                   </div>
-                  <div className="h-3 rounded-full bg-[#EEE7E2] overflow-hidden">
+                  <div className="h-3 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)' }}>
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${(category.count / maxCategoryCount) * 100}%` }}

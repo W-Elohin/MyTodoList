@@ -11,10 +11,8 @@ import { BottomNav } from '../components/BottomNav';
 export function TimelinePage() {
   const [searchParams] = useSearchParams();
   const dateParam = searchParams.get('date');
-  
-  const [selectedDate, setSelectedDate] = useState(() => {
-    return dateParam || getLocalDateString();
-  });
+
+  const [selectedDate, setSelectedDate] = useState(() => dateParam || getLocalDateString());
   const [todos, setTodos] = useState<Todo[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
   const timelineRef = useRef<HTMLDivElement>(null);
@@ -22,24 +20,15 @@ export function TimelinePage() {
 
   const loadTodos = () => {
     const allTodos = storage.getTodos();
-    const todayTodos = allTodos.filter((t) => t.date === selectedDate);
-    setTodos(todayTodos);
+    setTodos(allTodos.filter((t) => t.date === selectedDate));
   };
 
   useEffect(() => {
     loadTodos();
-
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 60000); // 1分ごとに更新
-
-    const handleStorageChange = () => {
-      loadTodos();
-    };
-
+    const timer = setInterval(() => setCurrentTime(new Date()), 60000);
+    const handleStorageChange = () => loadTodos();
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('focus', handleStorageChange);
-
     return () => {
       clearInterval(timer);
       window.removeEventListener('storage', handleStorageChange);
@@ -47,10 +36,8 @@ export function TimelinePage() {
     };
   }, [selectedDate]);
 
-  // 現在時刻の位置にスクロール（今日を表示時、初回または日付切替時）
   useEffect(() => {
-    if (selectedDate !== getLocalDateString()) return; // 今日以外はスクロールしない
-
+    if (selectedDate !== getLocalDateString()) return;
     const scrollToCurrentTime = () => {
       if (!timelineRef.current) return;
       const currentHour = currentTime.getHours();
@@ -59,12 +46,9 @@ export function TimelinePage() {
       const pixelsPerHour = 60;
       const currentPosition = currentTimeInHours * pixelsPerHour;
       const viewportHeight = window.innerHeight;
-      const targetScroll = currentPosition - viewportHeight / 3;
-      timelineRef.current.scrollTop = Math.max(0, targetScroll);
+      timelineRef.current.scrollTop = Math.max(0, currentPosition - viewportHeight / 3);
     };
-
     if (!hasScrolled.current) {
-      // レイアウト確定後にスクロール（DOM 準備待ち）
       const id = requestAnimationFrame(() => {
         scrollToCurrentTime();
         hasScrolled.current = true;
@@ -73,68 +57,52 @@ export function TimelinePage() {
     }
   }, [selectedDate, currentTime, todos]);
 
-  // 時間をHH:MM形式から分単位に変換
   const timeToMinutes = (timeStr: string) => {
     const [hours, minutes] = timeStr.split(':').map(Number);
     return hours * 60 + minutes;
   };
 
-  // 現在時刻を分単位で取得
   const currentTimeInMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
-
-  // 選択した日付が今日かどうかをチェック
   const isToday = selectedDate === getLocalDateString();
 
-  // 各時間帯のTodoを取得
-  const getTodosForHour = (hour: number) => {
-    return todos.filter((todo) => {
+  const getTodosForHour = (hour: number) =>
+    todos.filter((todo) => {
       const todoStartMinutes = timeToMinutes(todo.time);
       const todoStartHour = Math.floor(todoStartMinutes / 60);
       const todoEndMinutes = todoStartMinutes + (todo.duration || 30);
       const todoEndHour = Math.floor(todoEndMinutes / 60);
-      
       return hour >= todoStartHour && hour <= todoEndHour;
     });
-  };
 
-  // Todoの開始位置と高さを計算
   const getTodoPosition = (todo: Todo, hour: number) => {
     const todoStartMinutes = timeToMinutes(todo.time);
     const todoStartHour = Math.floor(todoStartMinutes / 60);
     const todoEndMinutes = todoStartMinutes + (todo.duration || 30);
-    
     if (todoStartHour === hour) {
       const startMinuteInHour = todoStartMinutes % 60;
       const topPercent = (startMinuteInHour / 60) * 100;
-      const durationInThisHour = Math.min(60 - startMinuteInHour, (todo.duration || 30));
+      const durationInThisHour = Math.min(60 - startMinuteInHour, todo.duration || 30);
       const heightPercent = (durationInThisHour / 60) * 100;
-      
       return { top: topPercent, height: heightPercent, isStart: true };
     } else {
       const todoEndHour = Math.floor(todoEndMinutes / 60);
-      if (hour < todoEndHour) {
-        // 中間の時間帯
-        return { top: 0, height: 100, isStart: false };
-      } else {
-        // 最後の時間帯
+      if (hour < todoEndHour) return { top: 0, height: 100, isStart: false };
+      else {
         const endMinuteInHour = todoEndMinutes % 60;
         return { top: 0, height: (endMinuteInHour / 60) * 100, isStart: false };
       }
     }
   };
 
-  // 現在時刻の位置（0-24時間の範囲で）
   const currentTimePosition = (currentTime.getHours() + currentTime.getMinutes() / 60) * 60;
 
-  // 日付変更関数
   const changeDate = (offset: number) => {
-    const current = new Date(selectedDate + 'T12:00:00'); // ローカル日付として解釈
+    const current = new Date(selectedDate + 'T12:00:00');
     current.setDate(current.getDate() + offset);
     setSelectedDate(getLocalDateString(current));
-    hasScrolled.current = false; // 日付変更時に再度スクロール
+    hasScrolled.current = false;
   };
 
-  // 日付フォーマット関数
   const formatDateDisplay = (dateStr: string) => {
     const date = new Date(dateStr);
     const month = date.getMonth() + 1;
@@ -143,37 +111,41 @@ export function TimelinePage() {
     return `${month}月${day}日 (${dayOfWeek})`;
   };
 
+  const glassPanel = {
+    background: 'rgba(255,255,255,0.06)',
+    backdropFilter: 'blur(16px)',
+    WebkitBackdropFilter: 'blur(16px)',
+    border: '1px solid rgba(255,255,255,0.12)',
+  } as const;
+
   return (
-    <div className="min-h-screen pb-24" style={{ backgroundColor: '#F4F0ED' }}>
+    <div className="min-h-screen pb-24" style={{ background: 'linear-gradient(180deg, #0a1628 0%, #1e3a5f 50%, #0c4a6e 100%)' }}>
       <BackgroundAnimation />
 
       <div className="max-w-md mx-auto px-4 pt-8">
-        <h1 className="text-3xl font-bold mb-4 text-gray-800">タイムライン</h1>
+        <h1 className="text-3xl font-bold mb-4 text-sky-50">タイムライン</h1>
 
-        {/* 日付選択器 */}
-        <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-4 shadow-lg mb-4">
+        <div className="rounded-2xl p-4 shadow-lg shadow-black/20 mb-4" style={glassPanel}>
           <div className="flex items-center justify-between">
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={() => changeDate(-1)}
-              className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+              className="p-2 hover:bg-white/10 rounded-xl transition-colors text-sky-300"
             >
               <ChevronLeft size={20} />
             </motion.button>
-            
             <motion.div
               key={selectedDate}
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-lg font-semibold text-gray-800"
+              className="text-lg font-semibold text-sky-50"
             >
               {formatDateDisplay(selectedDate)}
             </motion.div>
-            
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={() => changeDate(1)}
-              className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+              className="p-2 hover:bg-white/10 rounded-xl transition-colors text-sky-300"
             >
               <ChevronRight size={20} />
             </motion.button>
@@ -182,12 +154,10 @@ export function TimelinePage() {
 
         <div
           ref={timelineRef}
-          className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg overflow-y-auto relative"
-          style={{ height: 'calc(100vh - 200px)' }}
+          className="rounded-2xl shadow-lg shadow-black/20 overflow-y-auto relative"
+          style={{ ...glassPanel, height: 'calc(100vh - 200px)' }}
         >
-          {/* Timeline */}
-          <div className="relative" style={{ height: '1440px' }}> {/* 24時間 × 60px */}
-            {/* 現在時刻のライン */}
+          <div className="relative" style={{ height: '1440px' }}>
             <motion.div
               className="absolute left-0 right-0 z-20 flex items-center"
               style={{ top: `${currentTimePosition}px` }}
@@ -195,34 +165,27 @@ export function TimelinePage() {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
             >
-              <div className="w-12 h-8 bg-red-500 rounded-r-full flex items-center justify-center">
+              <div className="w-12 h-8 bg-sky-500 rounded-r-full flex items-center justify-center">
                 <div className="w-3 h-3 bg-white rounded-full" />
               </div>
-              <div className="flex-1 h-0.5 bg-red-500" />
+              <div className="flex-1 h-0.5 bg-sky-500/70" />
             </motion.div>
 
-            {/* 時間軸とTodo */}
             {Array.from({ length: 24 }, (_, hour) => {
               const hourTodos = getTodosForHour(hour);
-              
               return (
                 <div
                   key={hour}
-                  className="relative border-b border-gray-200"
+                  className="relative border-b border-white/8"
                   style={{ height: '60px' }}
                 >
-                  {/* 時刻表示 */}
-                  <div className="absolute left-0 top-0 w-12 text-xs text-gray-500 pl-2 pt-1">
+                  <div className="absolute left-0 top-0 w-12 text-xs text-sky-500 pl-2 pt-1">
                     {hour.toString().padStart(2, '0')}
                   </div>
-
-                  {/* Todo表示エリア */}
                   <div className="absolute left-12 right-0 top-0 bottom-0 pl-2 pr-2">
                     {hourTodos.map((todo) => {
                       const position = getTodoPosition(todo, hour);
-                      // 今日の場合のみ過去/未来を判定、それ以外は全てカラー表示
                       const isPast = isToday && (timeToMinutes(todo.time) + (todo.duration || 30) < currentTimeInMinutes);
-                      
                       return position.isStart ? (
                         <motion.div
                           key={todo.id}
@@ -232,7 +195,7 @@ export function TimelinePage() {
                             height: `${position.height}%`,
                             background: todo.category
                               ? `linear-gradient(135deg, ${todo.category.color}90 0%, ${todo.category.color}60 100%)`
-                              : 'rgba(129, 221, 230, 0.6)',
+                              : 'rgba(14,165,233,0.5)',
                             filter: isPast ? 'grayscale(100%)' : 'none',
                             opacity: isPast ? 0.5 : 1,
                             minHeight: '20px',
@@ -242,7 +205,7 @@ export function TimelinePage() {
                           transition={{ duration: 0.3 }}
                         >
                           <div className="font-medium text-white truncate">{todo.content}</div>
-                          <div className="text-[10px] text-white/90">
+                          <div className="text-[10px] text-white/80">
                             {todo.time} ({todo.duration || 30}分)
                             {todo.priority && ` [${todo.priority === 'high' ? '高' : todo.priority === 'medium' ? '中' : '低'}]`}
                           </div>
@@ -256,7 +219,7 @@ export function TimelinePage() {
                             height: `${position.height}%`,
                             background: todo.category
                               ? `linear-gradient(135deg, ${todo.category.color}90 0%, ${todo.category.color}60 100%)`
-                              : 'rgba(129, 221, 230, 0.6)',
+                              : 'rgba(14,165,233,0.5)',
                             filter: isPast ? 'grayscale(100%)' : 'none',
                             opacity: isPast ? 0.5 : 1,
                           }}

@@ -45,13 +45,13 @@ export function SubTaskList({ subtasks, onToggle, onAdd, onDelete }: SubTaskList
               onClick={() => onToggle(st.id)}
               className={`flex-shrink-0 w-4 h-4 rounded-full border-2 transition-all ${
                 st.completed
-                  ? 'bg-blue-500 border-blue-500'
-                  : 'border-gray-300 hover:border-blue-400'
+                  ? 'bg-sky-500 border-sky-500'
+                  : 'border-white/30 hover:border-sky-400'
               }`}
             />
             <span
               className={`flex-1 text-sm break-words ${
-                st.completed ? 'line-through text-gray-400' : 'text-gray-700'
+                st.completed ? 'line-through text-sky-600' : 'text-sky-100'
               }`}
             >
               {st.content}
@@ -59,7 +59,7 @@ export function SubTaskList({ subtasks, onToggle, onAdd, onDelete }: SubTaskList
             <button
               type="button"
               onClick={() => onDelete(st.id)}
-              className="opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-600 flex-shrink-0"
+              className="opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-300 flex-shrink-0"
             >
               <Trash2 size={13} />
             </button>
@@ -74,12 +74,14 @@ export function SubTaskList({ subtasks, onToggle, onAdd, onDelete }: SubTaskList
           onChange={(e) => setNewContent(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="サブタスクを追加..."
-          className="flex-1 px-3 py-1.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400 text-gray-800 placeholder:text-gray-400 bg-white"
+          className="flex-1 px-3 py-1.5 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-sky-400 text-sky-50 placeholder:text-sky-500"
+          style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)' }}
         />
         <button
           type="button"
           onClick={handleAdd}
-          className="px-3 py-1.5 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors flex items-center"
+          className="px-3 py-1.5 rounded-lg flex items-center transition-colors text-sky-300 hover:text-sky-100"
+          style={{ background: 'rgba(255,255,255,0.08)' }}
         >
           <Plus size={15} />
         </button>
