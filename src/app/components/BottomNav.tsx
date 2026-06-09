@@ -7,8 +7,8 @@ export function BottomNav() {
   const location = useLocation();
 
   const tabs = [
-    { path: '/my-day', icon: Sun, label: '今日' },
-    { path: '/', icon: CheckSquare, label: 'リスト' },
+    { path: '/', icon: Sun, label: '今日' },
+    { path: '/list', icon: CheckSquare, label: 'リスト' },
     { path: '/kanban', icon: Columns3, label: '看板' },
     { path: '/calendar', icon: Calendar, label: 'カレンダー' },
     { path: '/stats', icon: BarChart3, label: '統計' },
