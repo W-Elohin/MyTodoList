@@ -43,4 +43,17 @@ export default defineConfig({
   worker: {
     format: 'es',
   },
+
+  build: {
+    rollupOptions: {
+      output: {
+        // 效能（設計章程支柱 8）：把穩定的大型 vendor 拆成可長期快取的獨立 chunk。
+        // App 程式碼變動時這些 chunk 的 hash 不變，回訪者免重新下載。
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router'],
+          'vendor-motion': ['motion'],
+        },
+      },
+    },
+  },
 })
