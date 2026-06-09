@@ -1,6 +1,8 @@
 import { useEffect, useRef, useCallback } from 'react';
 
-const COLORS = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F'];
+// 海洋主題色票（取代原通用彩虹色），與全站視覺一致：
+// sky 海面藍系 + coral 珊瑚橘 + seaweed 海藻綠 + foam 泡沫白
+const COLORS = ['#0ea5e9', '#38bdf8', '#bae6fd', '#f97316', '#fdba74', '#10b981', '#6ee7b7', '#f0f9ff'];
 
 interface Particle {
   x: number;
