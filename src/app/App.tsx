@@ -6,6 +6,7 @@ import { registerServiceWorker } from './utils/pwa-register';
 import { initReminderService } from './utils/reminder';
 import { useUpdateCheck } from './hooks/useUpdateCheck';
 import { UpdatePrompt } from './components/UpdatePrompt';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 export default function App() {
   const { updateAvailable, applyUpdate, dismissUpdate } = useUpdateCheck();
@@ -16,7 +17,7 @@ export default function App() {
   }, []);
 
   return (
-    <>
+    <ErrorBoundary>
       <RouterProvider router={router} />
       <Toaster position="top-center" richColors />
       <UpdatePrompt
@@ -24,6 +25,6 @@ export default function App() {
         onUpdate={applyUpdate}
         onDismiss={dismissUpdate}
       />
-    </>
+    </ErrorBoundary>
   );
 }
