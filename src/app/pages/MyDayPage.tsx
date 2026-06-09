@@ -196,6 +196,8 @@ export function MyDayPage() {
           </motion.button>
         )}
 
+        {/* 大螢幕善用空間：有逾期時「逾期 | 今日」並排；無逾期則維持單欄（避免空欄） */}
+        <div className={overdueTodos.length > 0 ? 'lg:grid lg:grid-cols-2 lg:gap-6 lg:items-start' : ''}>
         {overdueTodos.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 8 }}
@@ -297,6 +299,7 @@ export function MyDayPage() {
             )}
           </AnimatePresence>
         </motion.div>
+        </div>
       </motion.div>
 
       <motion.button
