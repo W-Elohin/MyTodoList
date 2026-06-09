@@ -112,7 +112,7 @@ export function MyDayPage() {
   return (
     <motion.div
       className="min-h-screen pb-24"
-      style={{ background: 'linear-gradient(180deg, #0a1628 0%, #1e3a5f 50%, #0c4a6e 100%)' }}
+      style={{ background: 'var(--ocean-gradient)' }}
     >
       <BackgroundAnimation />
 
