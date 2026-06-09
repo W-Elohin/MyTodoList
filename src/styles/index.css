@@ -1,3 +1,46 @@
 @import './fonts.css';
 @import './tailwind.css';
 @import './theme.css';
+
+:root {
+  /* 海洋主色板 */
+  --ocean-deep: #0a1628;
+  --ocean-mid: #1e3a5f;
+  --ocean-surface: #0ea5e9;
+  --ocean-light: #38bdf8;
+  --ocean-foam: #bae6fd;
+  --ocean-pearl: #f0f9ff;
+
+  /* 珊瑚暖色（強調、CTA、high priority） */
+  --coral: #f97316;
+  --coral-light: #fdba74;
+
+  /* 海藻綠（success、low priority） */
+  --seaweed: #10b981;
+  --seaweed-light: #6ee7b7;
+
+  /* Glassmorphism 功能色 */
+  --glass-bg: rgba(255, 255, 255, 0.08);
+  --glass-bg-hover: rgba(255, 255, 255, 0.14);
+  --glass-border: rgba(255, 255, 255, 0.15);
+  --glass-border-hover: rgba(255, 255, 255, 0.25);
+
+  /* 文字 */
+  --text-primary: #f0f9ff;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+}
+
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: 1rem;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.glass-card:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-hover);
+}
