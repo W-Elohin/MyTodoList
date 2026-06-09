@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { Plus, Pencil, Folder, AlertCircle } from 'lucide-react';
+import { Plus, Pencil, Folder, AlertCircle, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Todo, TodoCategory } from '../types';
 import { storage } from '../utils/storage';
@@ -14,6 +14,7 @@ import { BackgroundAnimation } from '../components/BackgroundAnimation';
 import { BottomNav } from '../components/BottomNav';
 import { TodoCompleteButton } from '../components/TodoCompleteButton';
 import { useConfetti } from '../hooks/useConfetti';
+import { getFocusTasks } from '../utils/focus';
 
 export function MyDayPage() {
   const navigate = useNavigate();
@@ -114,6 +115,9 @@ export function MyDayPage() {
   const progress = todayTotal > 0 ? (todayCompleted / todayTotal) * 100 : 0;
   const greeting = getGreeting();
 
+  // 智慧聚焦：今日與逾期未完成中，依「逾期>優先度>時間」算出最該做的一件事
+  const [focusTask] = getFocusTasks([...overdueTodos, ...todos], todayStr, 1);
+
   const handleEditTodo = (updatedTodo: Todo) => {
     const allTodos = storage.getTodos();
     const updated = allTodos.map((t) => (t.id === updatedTodo.id ? updatedTodo : t));
@@ -171,6 +175,31 @@ export function MyDayPage() {
           </motion.div>
         ) : (
           <p className="text-sm text-sky-400 mb-6">まだ予定がありません</p>
+        )}
+
+        {focusTask && (
+          <motion.button
+            type="button"
+            onClick={() => setEditingTodo(focusTask)}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="w-full text-left mb-6 p-4 rounded-2xl border border-sky-400/30 overflow-hidden relative"
+            style={{
+              background: 'linear-gradient(135deg, rgba(14,165,233,0.18), rgba(16,185,129,0.12))',
+            }}
+          >
+            <div className="flex items-center gap-2 mb-1.5">
+              <Sparkles size={15} className="text-sky-300" />
+              <span className="text-xs font-medium text-sky-200 tracking-wide">
+                今のおすすめ
+              </span>
+            </div>
+            <p className="text-base font-medium text-sky-50 break-words">{focusTask.content}</p>
+            <div className="flex items-center gap-2 mt-1 text-xs text-sky-300">
+              {focusTask.date < todayStr && <span className="text-orange-300">期限切れ</span>}
+              <span>{focusTask.date < todayStr ? `${focusTask.date} ` : ''}{focusTask.time}</span>
+            </div>
+          </motion.button>
         )}
 
         {overdueTodos.length > 0 && (
