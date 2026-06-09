@@ -25,6 +25,7 @@ export function TodoCompleteButton({ onComplete, className = '' }: TodoCompleteB
       onClick={handleClick}
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
+      aria-label="完了にする"
       whileTap={{ scale: 0.9 }}
       className={`relative flex-shrink-0 w-7 h-7 rounded-full border-2 transition-colors mt-0.5 ${
         completing

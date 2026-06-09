@@ -146,6 +146,7 @@ export function MyDayPage() {
           <button
             type="button"
             onClick={() => navigate('/archive')}
+            aria-label="アーカイブを開く"
             className="p-3 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/15 hover:bg-white/15 transition-all text-sky-200"
           >
             <Folder size={24} />
@@ -292,6 +293,7 @@ export function MyDayPage() {
                     <button
                       type="button"
                       onClick={() => setEditingTodo(todo)}
+                      aria-label="編集"
                       className="flex-shrink-0 text-sky-400 hover:text-sky-200 transition-colors p-1"
                     >
                       <Pencil size={18} />
@@ -311,6 +313,7 @@ export function MyDayPage() {
           setEditingTodo(null);
           setShowAddDialog(true);
         }}
+        aria-label="新しいタスクを追加"
         className="fixed bottom-24 right-6 w-16 h-16 rounded-2xl shadow-2xl flex items-center justify-center bg-white/10 border border-white/15"
       >
         <Plus size={32} className="text-sky-300" />
