@@ -39,8 +39,12 @@ AppShell（#11）已讓桌面有側邊欄 + 較寬內容區（max-w-3xl）。但
 3. 無逾期任務：今日清單維持單欄、不留空欄。
 4. mobile/tablet：維持單欄堆疊，無回歸。
 
+## 追加（同階段 B）：標題字級階梯
+
+6 個頁面標題由固定 `text-3xl` 改為 `text-2xl md:text-3xl`：手機不再過大、桌面維持份量。
+涵蓋 My Day 以外的 ToDoリスト/看板/統計/カレンダー/タイムライン/完了済み。
+
 ## 後續
 
 - Kanban 桌面全寬（目前受 AppShell max-w 約束）。
-- 各頁標題字級階梯（`text-2xl md:text-3xl`）。
-- 階段 C 視覺精緻化（type scale、卡片層次、焦點環）。
+- 階段 C 視覺精緻化（卡片層次、焦點環、hover/active 一致化）。

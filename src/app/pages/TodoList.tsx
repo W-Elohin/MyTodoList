@@ -207,7 +207,7 @@ export function TodoList() {
     <>
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-3xl font-bold text-sky-50">ToDoリスト</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-sky-50">ToDoリスト</h1>
           <button
             onClick={() => navigate('/archive')}
             className="p-3 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/15 hover:bg-white/15 transition-all text-sky-200"
