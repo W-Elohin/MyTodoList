@@ -50,7 +50,7 @@ export function StatsPage() {
   } as const;
 
   return (
-    <div className="min-h-screen pb-24" style={{ background: 'linear-gradient(180deg, #0a1628 0%, #1e3a5f 50%, #0c4a6e 100%)' }}>
+    <div className="min-h-screen pb-24" style={{ background: 'var(--ocean-gradient)' }}>
       <BackgroundAnimation />
 
       <div className="max-w-4xl mx-auto px-4 pt-8">

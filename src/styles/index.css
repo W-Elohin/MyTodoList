@@ -6,10 +6,19 @@
   /* 海洋主色板 */
   --ocean-deep: #0a1628;
   --ocean-mid: #1e3a5f;
+  --ocean-abyss: #0c4a6e;
   --ocean-surface: #0ea5e9;
   --ocean-light: #38bdf8;
   --ocean-foam: #bae6fd;
   --ocean-pearl: #f0f9ff;
+
+  /* 全站統一頁面漸層（單一真實來源；勿在元件內重複硬編） */
+  --ocean-gradient: linear-gradient(
+    180deg,
+    var(--ocean-deep) 0%,
+    var(--ocean-mid) 50%,
+    var(--ocean-abyss) 100%
+  );
 
   /* 珊瑚暖色（強調、CTA、high priority） */
   --coral: #f97316;
@@ -29,6 +38,11 @@
   --text-primary: #f0f9ff;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
+}
+
+/* 全站頁面背景：套用此 class 即得統一海洋漸層 */
+.ocean-bg {
+  background: var(--ocean-gradient);
 }
 
 .glass-card {
