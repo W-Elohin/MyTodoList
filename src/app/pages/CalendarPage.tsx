@@ -5,8 +5,6 @@ import { useNavigate } from 'react-router';
 import { Todo } from '../types';
 import { storage } from '../utils/storage';
 import { getLocalDateString } from '../utils/date';
-import { BackgroundAnimation } from '../components/BackgroundAnimation';
-import { BottomNav } from '../components/BottomNav';
 
 export function CalendarPage() {
   const navigate = useNavigate();
@@ -58,10 +56,8 @@ export function CalendarPage() {
   } as const;
 
   return (
-    <div className="min-h-screen pb-24" style={{ background: 'var(--ocean-gradient)' }}>
-      <BackgroundAnimation />
-
-      <div className="max-w-md mx-auto px-4 pt-8">
+    <>
+      <div>
         <h1 className="text-3xl font-bold mb-8 text-sky-50">カレンダー</h1>
 
         <div className="rounded-2xl p-6 shadow-lg shadow-black/20 mb-6" style={glassPanel}>
@@ -211,7 +207,6 @@ export function CalendarPage() {
         )}
       </div>
 
-      <BottomNav />
-    </div>
+    </>
   );
 }

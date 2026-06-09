@@ -5,8 +5,6 @@ import { Todo } from '../types';
 import { storage } from '../utils/storage';
 import { getLocalDateString } from '../utils/date';
 import { cancelReminder } from '../utils/reminder';
-import { BackgroundAnimation } from '../components/BackgroundAnimation';
-import { BottomNav } from '../components/BottomNav';
 import { PRIORITY_META } from '../utils/priority';
 import { useConfetti } from '../hooks/useConfetti';
 
@@ -98,10 +96,8 @@ export function KanbanPage() {
   } as const;
 
   return (
-    <div className="min-h-screen pb-24" style={{ background: 'var(--ocean-gradient)' }}>
-      <BackgroundAnimation />
-
-      <div className="max-w-6xl mx-auto px-4 pt-8">
+    <>
+      <div>
         <div className="flex items-center gap-3 mb-6">
           <Columns3 size={32} className="text-sky-400" />
           <h1 className="text-3xl font-bold text-sky-50">看板</h1>
@@ -191,7 +187,6 @@ export function KanbanPage() {
         </div>
       </div>
 
-      <BottomNav />
-    </div>
+    </>
   );
 }

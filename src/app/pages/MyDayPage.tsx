@@ -10,8 +10,6 @@ import { GreetingEmoji } from '../components/GreetingEmoji';
 import { EmptyStateWrapper } from '../components/illustrations/EmptyStateWrapper';
 import { TurtleIllustration } from '../components/illustrations/TurtleIllustration';
 import { AddTodoDialog } from '../components/AddTodoDialog';
-import { BackgroundAnimation } from '../components/BackgroundAnimation';
-import { BottomNav } from '../components/BottomNav';
 import { TodoCompleteButton } from '../components/TodoCompleteButton';
 import { useConfetti } from '../hooks/useConfetti';
 import { getFocusTasks } from '../utils/focus';
@@ -128,13 +126,8 @@ export function MyDayPage() {
   };
 
   return (
-    <motion.div
-      className="min-h-screen pb-24"
-      style={{ background: 'var(--ocean-gradient)' }}
-    >
-      <BackgroundAnimation />
-
-      <motion.div className="max-w-md mx-auto px-4 pt-8">
+    <>
+      <motion.div>
         <motion.div className="flex items-start justify-between mb-6">
           <motion.div>
             <motion.div className="flex items-center gap-3 mb-1">
@@ -332,7 +325,6 @@ export function MyDayPage() {
         onAddCategory={handleAddCategory}
       />
 
-      <BottomNav />
-    </motion.div>
+    </>
   );
 }

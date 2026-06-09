@@ -15,7 +15,7 @@ export function BottomNav() {
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 safe-area-inset-bottom"
+    <div className="md:hidden fixed bottom-0 left-0 right-0 safe-area-inset-bottom z-30"
       style={{ background: 'rgba(10, 22, 40, 0.85)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderTop: '1px solid rgba(255,255,255,0.1)' }}
     >
       <div className="max-w-md mx-auto flex justify-around items-center h-16 px-4">

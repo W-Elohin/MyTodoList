@@ -5,8 +5,6 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Todo } from '../types';
 import { storage } from '../utils/storage';
 import { getLocalDateString } from '../utils/date';
-import { BackgroundAnimation } from '../components/BackgroundAnimation';
-import { BottomNav } from '../components/BottomNav';
 
 export function TimelinePage() {
   const [searchParams] = useSearchParams();
@@ -119,10 +117,8 @@ export function TimelinePage() {
   } as const;
 
   return (
-    <div className="min-h-screen pb-24" style={{ background: 'var(--ocean-gradient)' }}>
-      <BackgroundAnimation />
-
-      <div className="max-w-md mx-auto px-4 pt-8">
+    <>
+      <div>
         <h1 className="text-3xl font-bold mb-4 text-sky-50">タイムライン</h1>
 
         <div className="rounded-2xl p-4 shadow-lg shadow-black/20 mb-4" style={glassPanel}>
@@ -234,7 +230,6 @@ export function TimelinePage() {
         </div>
       </div>
 
-      <BottomNav />
-    </div>
+    </>
   );
 }
