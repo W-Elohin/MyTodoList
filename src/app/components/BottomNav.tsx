@@ -27,6 +27,8 @@ export function BottomNav() {
             <button
               key={tab.path}
               onClick={() => navigate(tab.path)}
+              aria-label={tab.label}
+              aria-current={isActive ? 'page' : undefined}
               className="relative flex flex-col items-center justify-center flex-1 h-full"
             >
               {isActive && (
