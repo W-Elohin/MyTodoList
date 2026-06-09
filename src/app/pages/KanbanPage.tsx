@@ -8,6 +8,7 @@ import { cancelReminder } from '../utils/reminder';
 import { BackgroundAnimation } from '../components/BackgroundAnimation';
 import { BottomNav } from '../components/BottomNav';
 import { PRIORITY_META } from '../utils/priority';
+import { useConfetti } from '../hooks/useConfetti';
 
 type PriorityColumn = {
   key: Todo['priority'] | 'uncategorized';
@@ -39,6 +40,7 @@ function AnimatedNumber({ value }: { value: number }) {
 
 export function KanbanPage() {
   const [todos, setTodos] = useState<Todo[]>([]);
+  const confetti = useConfetti();
 
   const loadTodos = () => {
     setTodos(storage.getTodos());
@@ -70,7 +72,14 @@ export function KanbanPage() {
   const getColumnTodos = (key: PriorityColumn['key']) =>
     activeTodos.filter((todo) => (key === 'uncategorized' ? !todo.priority : todo.priority === key));
 
-  const handleToggleComplete = (id: string) => {
+  const handleToggleComplete = (id: string, e?: React.MouseEvent) => {
+    // 完成獎勵：與 My Day / list 一致（confetti + 觸覺），統一各頁完成體驗
+    if (e) confetti.fire(e.clientX, e.clientY);
+    else confetti.fire();
+    if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+      navigator.vibrate(15);
+    }
+
     const allTodos = storage.getTodos();
     const updated = allTodos.map((todo) =>
       todo.id === id ? { ...todo, completed: true, completedAt: Date.now() } : todo
@@ -152,7 +161,7 @@ export function KanbanPage() {
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, scale: 0.94, x: 24 }}
                           transition={{ delay: index * 0.03 }}
-                          onClick={() => handleToggleComplete(todo.id)}
+                          onClick={(e) => handleToggleComplete(todo.id, e)}
                           className="w-full text-left rounded-2xl p-4 shadow-md hover:shadow-lg transition-all"
                           style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)' }}
                         >
