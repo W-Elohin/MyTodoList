@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { Search, X, ArrowLeft, Download, Upload } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { toast } from 'sonner';
 import { Todo, TodoCategory } from '../types';
-import { storage } from '../utils/storage';
+import { storage, isTodoArray, isCategoryArray } from '../utils/storage';
 import { BackgroundAnimation } from '../components/BackgroundAnimation';
 
 export function Archive() {
@@ -79,21 +80,32 @@ export function Archive() {
     reader.onload = (e) => {
       try {
         const data = JSON.parse(e.target?.result as string);
-        if (data.todos && Array.isArray(data.todos)) {
+
+        // 嚴格驗證外部檔案結構：複用 storage 的型別守衛，
+        // 拒絕結構不符的備份，避免注入壞資料導致渲染崩潰。
+        const hasValidTodos = isTodoArray(data?.todos);
+        const hasValidCategories = isCategoryArray(data?.categories);
+
+        if (!hasValidTodos && !hasValidCategories) {
+          toast.error('バックアップファイルの形式が正しくありません。');
+          return;
+        }
+
+        if (hasValidTodos) {
           storage.saveTodos(data.todos);
           const completed = data.todos
             .filter((t: Todo) => t.completed)
             .sort((a: Todo, b: Todo) => (b.completedAt || 0) - (a.completedAt || 0));
           setCompletedTodos(completed);
         }
-        if (data.categories && Array.isArray(data.categories)) {
+        if (hasValidCategories) {
           storage.saveCategories(data.categories);
           setCategories(data.categories);
         }
-        alert('データを正常にインポートしました！');
+        toast.success('データを正常にインポートしました！');
         window.dispatchEvent(new Event('storage'));
       } catch {
-        alert('インポートに失敗しました。ファイルを確認してください。');
+        toast.error('インポートに失敗しました。ファイルを確認してください。');
       }
     };
     reader.readAsText(file);
@@ -115,6 +127,7 @@ export function Archive() {
         <div className="flex items-center gap-4 mb-6">
           <button
             onClick={() => navigate('/')}
+            aria-label="戻る"
             className="p-2 hover:bg-white/10 rounded-xl transition-colors text-sky-300"
           >
             <ArrowLeft size={24} />
@@ -123,6 +136,7 @@ export function Archive() {
           <div className="flex gap-2">
             <button
               onClick={handleExport}
+              aria-label="バックアップをエクスポート"
               className="p-2 rounded-xl shadow-lg hover:bg-white/15 transition-all text-sky-300"
               style={glassPanel}
               title="エクスポート"
@@ -130,6 +144,7 @@ export function Archive() {
               <Download size={20} />
             </button>
             <label
+              aria-label="バックアップをインポート"
               className="p-2 rounded-xl shadow-lg hover:bg-white/15 transition-all cursor-pointer text-sky-300"
               style={glassPanel}
               title="インポート"
