@@ -27,6 +27,25 @@
 | #6 | 效能：路由分割 + vendor 快取（主 bundle 578KB→218KB） | 8 | 06 |
 | #7 | 可訪問性：lang、aria-label、aria-current | 6 | 07 |
 | #8 | 資料備份強化：匯入驗證 + 一致 toast | 7 | 08 |
+| #9 | 文件：整夜總結 + README 正式化 | — | — |
+| #10 | 統一完成體驗：Kanban 完成獎勵 | 4 | 09 |
+
+---
+
+## 🔴 待你處理：PR #11（未合併，需視覺 review）
+
+後半夜你給了關鍵批評：**沒有響應式、桌面是細欄飄空白、手機跑版、美感缺分析**。
+我據此把 loop 轉向 **UI 全面翻新 + 響應式**，並完成第一階段：
+
+- **[PR #11](https://github.com/W-Elohin/MyTodoList/pull/11) 響應式 AppShell**（手機底部導航 → 桌面側邊欄）。
+- **刻意未自行合併**：這是全站佈局變更，而我在過夜環境無法截圖驗證（Preview MCP `EPERM`）。
+  **請在 mobile(375)/tablet(768)/desktop(1280) 三寬度看過再合併。**
+- 分析與計畫見 `PM_Guide/10_UI_OVERHAUL_RESPONSIVE.md`、`PM_Guide/11_responsive_appshell.md`。
+- 階段 B（內容多欄 grid、字級階梯）、階段 C（視覺精緻化）**阻塞於 #11 的 review** —
+  我沒有在未驗證的基礎上繼續疊加盲改，避免製造爛攤子。
+
+**你早上的最短路徑**：開 #11 預覽 → 三寬度看一眼 → OK 就合併，回我一聲我接著做階段 B/C；
+不 OK 就告訴我哪裡要調整。
 
 ---
 
