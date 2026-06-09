@@ -12,6 +12,10 @@ export function TodoCompleteButton({ onComplete, className = '' }: TodoCompleteB
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     setCompleting(true);
+    // 觸覺回饋：完成時的短促震動，強化「被獎勵」的體感（支援的裝置才有作用）
+    if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+      navigator.vibrate(15);
+    }
     onComplete(e);
   };
 

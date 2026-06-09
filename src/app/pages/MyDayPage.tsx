@@ -12,6 +12,8 @@ import { TurtleIllustration } from '../components/illustrations/TurtleIllustrati
 import { AddTodoDialog } from '../components/AddTodoDialog';
 import { BackgroundAnimation } from '../components/BackgroundAnimation';
 import { BottomNav } from '../components/BottomNav';
+import { TodoCompleteButton } from '../components/TodoCompleteButton';
+import { useConfetti } from '../hooks/useConfetti';
 
 export function MyDayPage() {
   const navigate = useNavigate();
@@ -20,6 +22,7 @@ export function MyDayPage() {
   const [categories, setCategories] = useState<TodoCategory[]>([]);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
+  const confetti = useConfetti();
 
   const loadTodos = () => {
     const today = getLocalDateString();
@@ -75,8 +78,18 @@ export function MyDayPage() {
     loadTodos();
   };
 
-  const handleToggleComplete = (id: string) => {
+  const handleToggleComplete = (id: string, e?: React.MouseEvent) => {
     const allTodos = storage.getTodos();
+    const target = allTodos.find((t) => t.id === id);
+    const willComplete = target ? !target.completed : false;
+
+    // 🎉 完成即獎勵：主視圖也要有完成反饋（北極星：完成一件事時感覺被獎勵）。
+    // 從點擊位置噴發 confetti，未完成→完成才觸發。
+    if (willComplete) {
+      if (e) confetti.fire(e.clientX, e.clientY);
+      else confetti.fire();
+    }
+
     const updated = allTodos.map((t) =>
       t.id === id
         ? { ...t, completed: !t.completed, completedAt: !t.completed ? Date.now() : undefined }
@@ -84,7 +97,8 @@ export function MyDayPage() {
     );
     storage.saveTodos(updated);
     window.dispatchEvent(new Event('storage'));
-    loadTodos();
+    // 稍延遲重整，讓完成勾選動畫播完再從清單移除（避免瞬間消失感）
+    setTimeout(loadTodos, 320);
   };
 
   const handleAddCategory = (category: TodoCategory) => {
@@ -182,11 +196,9 @@ export function MyDayPage() {
                   className="bg-orange-500/[0.07] backdrop-blur-sm rounded-2xl p-4 border border-orange-400/25"
                 >
                   <div className="flex items-start gap-3">
-                    <button
-                      type="button"
-                      onClick={() => handleToggleComplete(todo.id)}
-                      aria-label="完了にする"
-                      className="flex-shrink-0 w-6 h-6 rounded-full border-2 border-orange-400/50 hover:border-orange-300 transition-all mt-0.5"
+                    <TodoCompleteButton
+                      onComplete={(e) => handleToggleComplete(todo.id, e)}
+                      className="mt-0.5"
                     />
                     <div className="flex-1 min-w-0">
                       <p className="text-base mb-1 break-words text-sky-50">{todo.content}</p>
@@ -227,10 +239,9 @@ export function MyDayPage() {
                   className="bg-white/10 backdrop-blur-sm rounded-2xl p-5 shadow-lg border border-white/15 hover:border-white/25 transition-colors"
                 >
                   <motion.div className="flex items-start gap-4">
-                    <button
-                      type="button"
-                      onClick={() => handleToggleComplete(todo.id)}
-                      className="flex-shrink-0 w-6 h-6 rounded-full border-2 border-white/30 hover:border-sky-400 transition-all mt-1"
+                    <TodoCompleteButton
+                      onComplete={(e) => handleToggleComplete(todo.id, e)}
+                      className="mt-0.5"
                     />
                     <motion.div className="flex-1 min-w-0">
                       <p className="text-base mb-2 break-words text-sky-50">{todo.content}</p>
