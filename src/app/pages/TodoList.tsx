@@ -7,8 +7,6 @@ import { storage } from '../utils/storage';
 import { getNextOccurrence, getRecurrenceLabel } from '../utils/recurrence';
 import { cancelReminder, scheduleReminder } from '../utils/reminder';
 import { AddTodoDialog } from '../components/AddTodoDialog';
-import { BackgroundAnimation } from '../components/BackgroundAnimation';
-import { BottomNav } from '../components/BottomNav';
 import { SearchBar, highlightText } from '../components/SearchBar';
 import { FilterChips, FilterValue } from '../components/FilterChips';
 import { SubTaskList } from '../components/SubTaskList';
@@ -206,10 +204,8 @@ export function TodoList() {
   };
 
   return (
-    <div className="min-h-screen pb-24" style={{ background: 'var(--ocean-gradient)' }}>
-      <BackgroundAnimation />
-
-      <div className="max-w-md mx-auto px-4 pt-8">
+    <>
+      <div>
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-3xl font-bold text-sky-50">ToDoリスト</h1>
           <button
@@ -381,7 +377,6 @@ export function TodoList() {
         onAddCategory={handleAddCategory}
       />
 
-      <BottomNav />
-    </div>
+    </>
   );
 }

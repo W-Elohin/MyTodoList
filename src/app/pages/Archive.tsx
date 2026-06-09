@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { Todo, TodoCategory } from '../types';
 import { storage, isTodoArray, isCategoryArray } from '../utils/storage';
-import { BackgroundAnimation } from '../components/BackgroundAnimation';
 
 export function Archive() {
   const navigate = useNavigate();
@@ -120,10 +119,8 @@ export function Archive() {
   } as const;
 
   return (
-    <div className="min-h-screen pb-8" style={{ background: 'var(--ocean-gradient)' }}>
-      <BackgroundAnimation />
-
-      <div className="max-w-md mx-auto px-4 pt-8">
+    <>
+      <div>
         <div className="flex items-center gap-4 mb-6">
           <button
             onClick={() => navigate('/')}
@@ -280,6 +277,6 @@ export function Archive() {
           )}
         </div>
       </div>
-    </div>
+    </>
   );
 }

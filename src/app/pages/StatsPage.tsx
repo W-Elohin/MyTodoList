@@ -5,8 +5,6 @@ import { Todo } from '../types';
 import { storage } from '../utils/storage';
 import { getLocalDateString } from '../utils/date';
 import { calculateStats } from '../utils/statsCalculator';
-import { BackgroundAnimation } from '../components/BackgroundAnimation';
-import { BottomNav } from '../components/BottomNav';
 
 const circleSize = 168;
 const strokeWidth = 14;
@@ -50,10 +48,8 @@ export function StatsPage() {
   } as const;
 
   return (
-    <div className="min-h-screen pb-24" style={{ background: 'var(--ocean-gradient)' }}>
-      <BackgroundAnimation />
-
-      <div className="max-w-4xl mx-auto px-4 pt-8">
+    <>
+      <div>
         <div className="flex items-center gap-3 mb-6">
           <BarChart3 size={32} className="text-sky-400" />
           <h1 className="text-3xl font-bold text-sky-50">統計</h1>
@@ -199,7 +195,6 @@ export function StatsPage() {
         </motion.section>
       </div>
 
-      <BottomNav />
-    </div>
+    </>
   );
 }
