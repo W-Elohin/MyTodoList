@@ -7,6 +7,7 @@ import { getLocalDateString } from '../utils/date';
 import { cancelReminder } from '../utils/reminder';
 import { BackgroundAnimation } from '../components/BackgroundAnimation';
 import { BottomNav } from '../components/BottomNav';
+import { PRIORITY_META } from '../utils/priority';
 
 type PriorityColumn = {
   key: Todo['priority'] | 'uncategorized';
@@ -15,11 +16,12 @@ type PriorityColumn = {
   badge: string;
 };
 
+// 優先度欄位的色彩派生自單一真實來源 PRIORITY_META，避免與其他畫面 drift
 const columns: PriorityColumn[] = [
   { key: 'uncategorized', title: '未分類', bg: 'rgba(255,255,255,0.05)', badge: 'bg-slate-400' },
-  { key: 'low', title: '低', bg: 'rgba(16,185,129,0.1)', badge: 'bg-emerald-500' },
-  { key: 'medium', title: '中', bg: 'rgba(245,158,11,0.1)', badge: 'bg-amber-500' },
-  { key: 'high', title: '高', bg: 'rgba(239,68,68,0.1)', badge: 'bg-red-500' },
+  { key: 'low', title: PRIORITY_META.low.label, bg: PRIORITY_META.low.columnBg, badge: PRIORITY_META.low.badgeClass },
+  { key: 'medium', title: PRIORITY_META.medium.label, bg: PRIORITY_META.medium.columnBg, badge: PRIORITY_META.medium.badgeClass },
+  { key: 'high', title: PRIORITY_META.high.label, bg: PRIORITY_META.high.columnBg, badge: PRIORITY_META.high.badgeClass },
 ];
 
 function AnimatedNumber({ value }: { value: number }) {

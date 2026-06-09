@@ -8,6 +8,7 @@ import { useWhisper } from '../hooks/useWhisper';
 import { parseIntent } from '../utils/nlpParser';
 import { VoiceInputButton } from './VoiceInputButton';
 import { SubTaskList } from './SubTaskList';
+import { PRIORITY_META, PRIORITY_ORDER } from '../utils/priority';
 
 const RECURRENCE_OPTIONS: { type: RecurrenceType; label: string }[] = [
   { type: 'daily', label: '毎日' },
@@ -342,9 +343,19 @@ export function AddTodoDialog({
                     )}
                     {openPanel === 'priority' && (
                       <motion.div className="flex gap-2">
-                        {(['low', 'medium', 'high'] as const).map((p) => (
-                          <button key={p} type="button" onClick={() => setPriority(priority === p ? undefined : p)} className={`flex-1 py-2 rounded-xl text-sm font-medium ${priority === p ? (p === 'high' ? 'bg-red-500/80 text-white' : p === 'medium' ? 'bg-yellow-500/80 text-white' : 'bg-emerald-500/80 text-white') : 'bg-white/10 text-sky-300'}`}>{p === 'high' ? '高' : p === 'medium' ? '中' : '低'}</button>
-                        ))}
+                        {PRIORITY_ORDER.map((p) => {
+                          const meta = PRIORITY_META[p];
+                          return (
+                            <button
+                              key={p}
+                              type="button"
+                              onClick={() => setPriority(priority === p ? undefined : p)}
+                              className={`flex-1 py-2 rounded-xl text-sm font-medium ${priority === p ? meta.activeClass : 'bg-white/10 text-sky-300'}`}
+                            >
+                              {meta.label}
+                            </button>
+                          );
+                        })}
                       </motion.div>
                     )}
                     {openPanel === 'tags' && (
