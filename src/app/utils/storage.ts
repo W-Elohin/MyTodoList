@@ -61,7 +61,8 @@ function isTodo(value: unknown): value is Todo {
   );
 }
 
-function isTodoArray(value: unknown): value is Todo[] {
+// 匯出供匯入備份時驗證外部檔案結構（複用同一套守衛，確保一致）
+export function isTodoArray(value: unknown): value is Todo[] {
   return Array.isArray(value) && value.every(isTodo);
 }
 
@@ -71,7 +72,7 @@ function isCategory(value: unknown): value is TodoCategory {
   return typeof c.id === 'string' && typeof c.name === 'string' && typeof c.color === 'string';
 }
 
-function isCategoryArray(value: unknown): value is TodoCategory[] {
+export function isCategoryArray(value: unknown): value is TodoCategory[] {
   return Array.isArray(value) && value.every(isCategory);
 }
 
