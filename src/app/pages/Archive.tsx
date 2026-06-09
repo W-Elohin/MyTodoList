@@ -6,6 +6,12 @@ import { toast } from 'sonner';
 import { Todo, TodoCategory } from '../types';
 import { storage, isTodoArray, isCategoryArray } from '../utils/storage';
 import { BackgroundAnimation } from '../components/BackgroundAnimation';
+import { ImportMergeDialog } from '../components/ImportMergeDialog';
+
+interface ImportData {
+  todos?: Todo[];
+  categories?: TodoCategory[];
+}
 
 export function Archive() {
   const navigate = useNavigate();
@@ -13,6 +19,8 @@ export function Archive() {
   const [categories, setCategories] = useState<TodoCategory[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [importDialog, setImportDialog] = useState({ isOpen: false, data: null as ImportData | null, fileName: '' });
+  const fileInputRef = useState<HTMLInputElement | null>(null)[1];
 
   useEffect(() => {
     const allTodos = storage.getTodos();
@@ -81,8 +89,6 @@ export function Archive() {
       try {
         const data = JSON.parse(e.target?.result as string);
 
-        // 嚴格驗證外部檔案結構：複用 storage 的型別守衛，
-        // 拒絕結構不符的備份，避免注入壞資料導致渲染崩潰。
         const hasValidTodos = isTodoArray(data?.todos);
         const hasValidCategories = isCategoryArray(data?.categories);
 
@@ -91,25 +97,96 @@ export function Archive() {
           return;
         }
 
-        if (hasValidTodos) {
-          storage.saveTodos(data.todos);
-          const completed = data.todos
-            .filter((t: Todo) => t.completed)
-            .sort((a: Todo, b: Todo) => (b.completedAt || 0) - (a.completedAt || 0));
-          setCompletedTodos(completed);
-        }
-        if (hasValidCategories) {
-          storage.saveCategories(data.categories);
-          setCategories(data.categories);
-        }
-        toast.success('データを正常にインポートしました！');
-        window.dispatchEvent(new Event('storage'));
+        // 保存导入数据并显示对话框
+        setImportDialog({
+          isOpen: true,
+          data: { todos: data.todos, categories: data.categories },
+          fileName: file.name,
+        });
       } catch {
         toast.error('インポートに失敗しました。ファイルを確認してください。');
       }
     };
     reader.readAsText(file);
     event.target.value = '';
+  };
+
+  const handleMergeTodos = (existing: Todo[], imported: Todo[]) => {
+    // 按 ID 去重：导入的数据保留，现有的保留（使用 Map 确保 ID 唯一）
+    const merged = new Map<string, Todo>();
+    existing.forEach((t) => merged.set(t.id, t));
+    imported.forEach((t) => {
+      if (!merged.has(t.id)) {
+        merged.set(t.id, t);
+      }
+    });
+    return Array.from(merged.values());
+  };
+
+  const handleMergeCategories = (existing: TodoCategory[], imported: TodoCategory[]) => {
+    const merged = new Map<string, TodoCategory>();
+    existing.forEach((c) => merged.set(c.id, c));
+    imported.forEach((c) => {
+      if (!merged.has(c.id)) {
+        merged.set(c.id, c);
+      }
+    });
+    return Array.from(merged.values());
+  };
+
+  const handleImportMerge = () => {
+    if (!importDialog.data) return;
+
+    try {
+      const currentTodos = storage.getTodos();
+      const currentCategories = storage.getCategories();
+
+      if (importDialog.data.todos) {
+        const merged = handleMergeTodos(currentTodos, importDialog.data.todos);
+        storage.saveTodos(merged);
+        const completed = merged
+          .filter((t) => t.completed)
+          .sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0));
+        setCompletedTodos(completed);
+      }
+
+      if (importDialog.data.categories) {
+        const merged = handleMergeCategories(currentCategories, importDialog.data.categories);
+        storage.saveCategories(merged);
+        setCategories(merged);
+      }
+
+      toast.success('データをマージしました！');
+      window.dispatchEvent(new Event('storage'));
+      setImportDialog({ isOpen: false, data: null, fileName: '' });
+    } catch {
+      toast.error('マージに失敗しました。');
+    }
+  };
+
+  const handleImportReplace = () => {
+    if (!importDialog.data) return;
+
+    try {
+      if (importDialog.data.todos) {
+        storage.saveTodos(importDialog.data.todos);
+        const completed = importDialog.data.todos
+          .filter((t) => t.completed)
+          .sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0));
+        setCompletedTodos(completed);
+      }
+
+      if (importDialog.data.categories) {
+        storage.saveCategories(importDialog.data.categories);
+        setCategories(importDialog.data.categories);
+      }
+
+      toast.success('データを置き換えました！');
+      window.dispatchEvent(new Event('storage'));
+      setImportDialog({ isOpen: false, data: null, fileName: '' });
+    } catch {
+      toast.error('置き換えに失敗しました。');
+    }
   };
 
   const glassPanel = {
@@ -280,6 +357,14 @@ export function Archive() {
           )}
         </div>
       </div>
+
+      <ImportMergeDialog
+        isOpen={importDialog.isOpen}
+        fileName={importDialog.fileName}
+        onMerge={handleImportMerge}
+        onReplace={handleImportReplace}
+        onCancel={() => setImportDialog({ isOpen: false, data: null, fileName: '' })}
+      />
     </div>
   );
 }
