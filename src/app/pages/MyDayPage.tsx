@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { Plus, Pencil, Folder } from 'lucide-react';
+import { Plus, Pencil, Folder, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Todo, TodoCategory } from '../types';
 import { storage } from '../utils/storage';
@@ -16,13 +16,22 @@ import { BottomNav } from '../components/BottomNav';
 export function MyDayPage() {
   const navigate = useNavigate();
   const [todos, setTodos] = useState<Todo[]>([]);
+  const [overdueTodos, setOverdueTodos] = useState<Todo[]>([]);
   const [categories, setCategories] = useState<TodoCategory[]>([]);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
 
   const loadTodos = () => {
     const today = getLocalDateString();
-    setTodos(storage.getTodos().filter((t) => !t.completed && t.date === today));
+    const all = storage.getTodos();
+    setTodos(all.filter((t) => !t.completed && t.date === today));
+    // 逾期：未完成且日期早於今日。My Day 必須讓使用者一眼看見被遺漏的事，
+    // 而非讓它們無聲消失（北極星：打開三秒內知道該做什麼）。
+    setOverdueTodos(
+      all
+        .filter((t) => !t.completed && t.date < today)
+        .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
+    );
     setCategories(storage.getCategories());
   };
 
@@ -101,7 +110,10 @@ export function MyDayPage() {
   };
 
   return (
-    <motion.div className="min-h-screen pb-24" style={{ backgroundColor: '#F4F0ED' }}>
+    <motion.div
+      className="min-h-screen pb-24"
+      style={{ background: 'linear-gradient(180deg, #0a1628 0%, #1e3a5f 50%, #0c4a6e 100%)' }}
+    >
       <BackgroundAnimation />
 
       <motion.div className="max-w-md mx-auto px-4 pt-8">
@@ -145,6 +157,54 @@ export function MyDayPage() {
           </motion.div>
         ) : (
           <p className="text-sm text-sky-400 mb-6">まだ予定がありません</p>
+        )}
+
+        {overdueTodos.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6"
+          >
+            <div className="flex items-center gap-2 mb-3 ml-1">
+              <AlertCircle size={16} className="text-orange-400" />
+              <span className="text-sm font-medium text-orange-300">
+                期限切れ {overdueTodos.length}
+              </span>
+            </div>
+            <motion.div className="space-y-3">
+              {overdueTodos.map((todo) => (
+                <motion.div
+                  key={todo.id}
+                  layout
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, x: -100 }}
+                  className="bg-orange-500/[0.07] backdrop-blur-sm rounded-2xl p-4 border border-orange-400/25"
+                >
+                  <div className="flex items-start gap-3">
+                    <button
+                      type="button"
+                      onClick={() => handleToggleComplete(todo.id)}
+                      aria-label="完了にする"
+                      className="flex-shrink-0 w-6 h-6 rounded-full border-2 border-orange-400/50 hover:border-orange-300 transition-all mt-0.5"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-base mb-1 break-words text-sky-50">{todo.content}</p>
+                      <span className="text-xs text-orange-300/90">{todo.date} {todo.time}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setEditingTodo(todo)}
+                      aria-label="編集"
+                      className="flex-shrink-0 text-orange-300/70 hover:text-orange-200 transition-colors p-1"
+                    >
+                      <Pencil size={18} />
+                    </button>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          </motion.div>
         )}
 
         <motion.div className="space-y-4 mb-6">
