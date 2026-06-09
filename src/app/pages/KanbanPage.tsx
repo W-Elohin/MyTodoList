@@ -100,7 +100,7 @@ export function KanbanPage() {
       <div>
         <div className="flex items-center gap-3 mb-6">
           <Columns3 size={32} className="text-sky-400" />
-          <h1 className="text-3xl font-bold text-sky-50">看板</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-sky-50">看板</h1>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">

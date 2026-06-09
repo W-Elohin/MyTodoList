@@ -129,7 +129,7 @@ export function Archive() {
           >
             <ArrowLeft size={24} />
           </button>
-          <h1 className="text-3xl font-bold flex-1 text-sky-50">完了済み</h1>
+          <h1 className="text-2xl md:text-3xl font-bold flex-1 text-sky-50">完了済み</h1>
           <div className="flex gap-2">
             <button
               onClick={handleExport}

@@ -58,7 +58,7 @@ export function CalendarPage() {
   return (
     <>
       <div>
-        <h1 className="text-3xl font-bold mb-8 text-sky-50">カレンダー</h1>
+        <h1 className="text-2xl md:text-3xl font-bold mb-8 text-sky-50">カレンダー</h1>
 
         <div className="rounded-2xl p-6 shadow-lg shadow-black/20 mb-6" style={glassPanel}>
           <div className="flex items-center justify-between mb-6">

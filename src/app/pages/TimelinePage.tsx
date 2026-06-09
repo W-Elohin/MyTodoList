@@ -119,7 +119,7 @@ export function TimelinePage() {
   return (
     <>
       <div>
-        <h1 className="text-3xl font-bold mb-4 text-sky-50">タイムライン</h1>
+        <h1 className="text-2xl md:text-3xl font-bold mb-4 text-sky-50">タイムライン</h1>
 
         <div className="rounded-2xl p-4 shadow-lg shadow-black/20 mb-4" style={glassPanel}>
           <div className="flex items-center justify-between">

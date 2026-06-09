@@ -52,7 +52,7 @@ export function StatsPage() {
       <div>
         <div className="flex items-center gap-3 mb-6">
           <BarChart3 size={32} className="text-sky-400" />
-          <h1 className="text-3xl font-bold text-sky-50">統計</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-sky-50">統計</h1>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
