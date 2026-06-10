@@ -10,6 +10,7 @@ import { UpdatePrompt } from './components/UpdatePrompt';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ThemeProvider } from './components/ThemeProvider';
 import { GameProvider } from './context/GameContext';
+import { LevelUpCelebration } from './components/game/LevelUpCelebration';
 
 export default function App() {
   const { updateAvailable, applyUpdate, dismissUpdate } = useUpdateCheck();
@@ -27,6 +28,7 @@ export default function App() {
           <MotionConfig reducedMotion="user">
             <RouterProvider router={router} />
             <Toaster position="top-center" richColors />
+            <LevelUpCelebration />
             <UpdatePrompt
               open={updateAvailable}
               onUpdate={applyUpdate}

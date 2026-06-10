@@ -1,15 +1,18 @@
 import { useNavigate, useLocation } from 'react-router';
-import { CheckSquare, Calendar, Sun, Columns3, BarChart3, Clock, Archive } from 'lucide-react';
+import { CheckSquare, Calendar, Sun, Columns3, BarChart3, Clock, Archive, Settings, Home, Store } from 'lucide-react';
 import { motion } from 'motion/react';
 
 const items = [
   { path: '/', icon: Sun, label: '今日' },
+  { path: '/home', icon: Home, label: 'マイルーム' },
+  { path: '/shop', icon: Store, label: 'ショップ' },
   { path: '/list', icon: CheckSquare, label: 'リスト' },
-  { path: '/kanban', icon: Columns3, label: '看板' },
+  { path: '/kanban', icon: Columns3, label: 'カンバン' },
   { path: '/calendar', icon: Calendar, label: 'カレンダー' },
   { path: '/timeline', icon: Clock, label: 'タイムライン' },
   { path: '/stats', icon: BarChart3, label: '統計' },
   { path: '/archive', icon: Archive, label: 'アーカイブ' },
+  { path: '/settings', icon: Settings, label: '設定' },
 ];
 
 /**
@@ -24,11 +27,10 @@ export function Sidebar() {
   return (
     <aside
       className="hidden md:flex md:flex-col md:w-56 lg:w-60 sticky top-0 h-screen shrink-0 px-3 py-6 gap-1"
-      style={{ borderRight: '1px solid rgba(255,255,255,0.08)' }}
+      style={{ borderRight: '1px solid var(--nav-border)' }}
       aria-label="メインナビゲーション"
     >
-      <div className="px-3 mb-4 flex items-center gap-2 text-sky-50">
-        <span className="text-xl" aria-hidden>🌊</span>
+      <div className="px-3 mb-4 flex items-center gap-2 ocean-heading">
         <span className="font-bold tracking-wide">MyTodo</span>
       </div>
       {items.map((item) => {
@@ -40,22 +42,24 @@ export function Sidebar() {
             onClick={() => navigate(item.path)}
             aria-label={item.label}
             aria-current={isActive ? 'page' : undefined}
-            className="relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors"
+            className="relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors focus-visible:outline-offset-2"
           >
             {isActive && (
               <motion.div
                 layoutId="sidebar-active"
                 className="absolute inset-0 rounded-xl"
-                style={{ background: 'rgba(14,165,233,0.18)' }}
+                style={{ background: 'var(--nav-active-bg)' }}
                 transition={{ type: 'spring', bounce: 0.2, duration: 0.5 }}
               />
             )}
             <Icon
               size={20}
-              className={`relative z-10 ${isActive ? 'text-sky-100' : 'text-sky-400'}`}
+              className="relative z-10"
+              style={{ color: isActive ? 'var(--nav-text-active)' : 'var(--nav-text)' }}
             />
             <span
-              className={`relative z-10 text-sm ${isActive ? 'text-sky-50 font-medium' : 'text-sky-300'}`}
+              className={`relative z-10 text-sm ${isActive ? 'font-medium' : ''}`}
+              style={{ color: isActive ? 'var(--nav-text-active)' : 'var(--nav-text)' }}
             >
               {item.label}
             </span>

@@ -18,6 +18,9 @@ export const router = createBrowserRouter([
       { path: 'stats', lazy: async () => ({ Component: (await import('./pages/StatsPage')).StatsPage }) },
       { path: 'timeline', lazy: async () => ({ Component: (await import('./pages/TimelinePage')).TimelinePage }) },
       { path: 'archive', lazy: async () => ({ Component: (await import('./pages/Archive')).Archive }) },
+      { path: 'home', lazy: async () => ({ Component: (await import('./pages/HomePage')).HomePage }) },
+      { path: 'shop', lazy: async () => ({ Component: (await import('./pages/ShopPage')).ShopPage }) },
+      { path: 'settings', lazy: async () => ({ Component: (await import('./pages/SettingsPage')).SettingsPage }) },
       // 舊路由相容：保留 /my-day 書籤與既有 PWA 捷徑，重導向至正規首頁
       { path: 'my-day', element: <Navigate to="/" replace /> },
     ],
