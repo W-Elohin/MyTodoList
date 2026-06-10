@@ -1,4 +1,5 @@
-import { Outlet } from 'react-router';
+import { Outlet, useLocation } from 'react-router';
+import { AnimatePresence, motion } from 'motion/react';
 import { BackgroundAnimation } from './BackgroundAnimation';
 import { BottomNav } from './BottomNav';
 import { Sidebar } from './Sidebar';
@@ -13,6 +14,7 @@ import { Sidebar } from './Sidebar';
  * - ≥md：左側 Sidebar，內容區並排放寬（max-w 隨斷點增大）。
  */
 export function AppShell() {
+  const location = useLocation();
   return (
     <div className="min-h-screen" style={{ background: 'var(--ocean-gradient)' }}>
       <BackgroundAnimation />
@@ -20,7 +22,18 @@ export function AppShell() {
         <Sidebar />
         <main className="flex-1 min-h-screen pb-24 md:pb-10">
           <div className="mx-auto w-full px-4 pt-8 max-w-md md:max-w-3xl lg:max-w-4xl">
-            <Outlet />
+            {/* 視圖切換過場：淡入 + 輕微上滑，讓導航更有質感 */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={location.pathname}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.25, ease: 'easeOut' }}
+              >
+                <Outlet />
+              </motion.div>
+            </AnimatePresence>
           </div>
         </main>
       </div>
