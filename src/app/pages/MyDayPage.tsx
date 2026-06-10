@@ -13,6 +13,7 @@ import { AddTodoDialog } from '../components/AddTodoDialog';
 import { TodoCompleteButton } from '../components/TodoCompleteButton';
 import { useConfetti } from '../hooks/useConfetti';
 import { getFocusTasks } from '../utils/focus';
+import { CreatureImage } from '../components/creatures/CreatureImage';
 
 export function MyDayPage() {
   const navigate = useNavigate();
@@ -247,11 +248,19 @@ export function MyDayPage() {
         <motion.div className="space-y-4 mb-6">
           <AnimatePresence mode="popLayout">
             {todos.length === 0 ? (
-              <EmptyStateWrapper
-                illustration={<TurtleIllustration />}
-                title="今日のタスクはありません"
-                subtitle="のんびりしましょう！"
-              />
+              todayTotal > 0 ? (
+                <EmptyStateWrapper
+                  illustration={<CreatureImage name="dolphin" size={180} className="mx-auto" />}
+                  title="今日のタスク、全部完了！"
+                  subtitle="お見事です。少し休んでくださいね 🎉"
+                />
+              ) : (
+                <EmptyStateWrapper
+                  illustration={<TurtleIllustration />}
+                  title="今日のタスクはありません"
+                  subtitle="のんびりしましょう！"
+                />
+              )
             ) : (
               todos.map((todo, index) => (
                 <motion.div
