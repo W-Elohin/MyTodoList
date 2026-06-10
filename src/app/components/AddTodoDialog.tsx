@@ -9,6 +9,7 @@ import { parseIntent } from '../utils/nlpParser';
 import { VoiceInputButton } from './VoiceInputButton';
 import { SubTaskList } from './SubTaskList';
 import { PRIORITY_META, PRIORITY_ORDER } from '../utils/priority';
+import { dialogContentVariants, dialogOverlayVariants, springTransition } from '../utils/animations';
 
 const RECURRENCE_OPTIONS: { type: RecurrenceType; label: string }[] = [
   { type: 'daily', label: '毎日' },
@@ -103,7 +104,7 @@ export function AddTodoDialog({
     const autoFields: string[] = [];
     if (parsed.date) {
       setDate(parsed.date);
-      autoFields.push('日期');
+      autoFields.push('日付');
     }
     if (parsed.priority) {
       setPriority(parsed.priority);
@@ -111,7 +112,7 @@ export function AddTodoDialog({
     }
 
     if (autoFields.length > 0) {
-      toast.success(`已自動設定：${autoFields.join('、')}`);
+      toast.success(`自動設定しました：${autoFields.join('、')}`);
     }
   }, []);
 
@@ -287,8 +288,22 @@ export function AddTodoDialog({
     <AnimatePresence>
       {open && (
         <>
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" onClick={onClose} />
-          <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} transition={{ type: 'spring', bounce: 0.3, duration: 0.4 }} className="fixed inset-x-4 top-[8vh] max-w-md mx-auto bg-[#0a1628]/95 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-2xl z-50 overflow-hidden max-h-[85vh] flex flex-col">
+          <motion.div
+            variants={dialogOverlayVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+            onClick={onClose}
+          />
+          <motion.div
+            variants={dialogContentVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={springTransition}
+            className="fixed inset-x-4 top-[8vh] max-w-md mx-auto bg-[#0a1628]/95 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-2xl z-50 overflow-hidden max-h-[85vh] flex flex-col"
+          >
             <motion.div className="p-5 pb-3 flex items-center justify-between flex-shrink-0">
               <h2 className="text-xl font-semibold text-sky-50">{isEditMode ? '編集' : '新規追加'}</h2>
               <button type="button" onClick={onClose} className="p-2 hover:bg-white/10 rounded-xl transition-colors text-sky-300"><X size={22} /></button>

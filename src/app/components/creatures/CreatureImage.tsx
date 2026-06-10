@@ -37,9 +37,27 @@ export function CreatureImage({ name, size = 160, float = true, className = '' }
       height={size}
       className={className}
       style={{ width: size, height: size, objectFit: 'contain', display: 'block' }}
-      initial={{ opacity: 0, y: 0 }}
-      animate={float ? { opacity: 1, y: [0, -10, 0] } : { opacity: 1 }}
-      transition={float ? { duration: 3.2, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.3 }}
+      initial={{ opacity: 0, scale: 0.85, y: 8 }}
+      animate={
+        float
+          ? {
+              opacity: 1,
+              scale: 1,
+              y: [0, -12, 0],
+              rotate: [-1.5, 1.5, -1.5],
+            }
+          : { opacity: 1, scale: 1, y: 0 }
+      }
+      transition={
+        float
+          ? {
+              opacity: { duration: 0.4 },
+              scale: { type: 'spring', stiffness: 260, damping: 20 },
+              y: { duration: 3.6, repeat: Infinity, ease: 'easeInOut' },
+              rotate: { duration: 4.2, repeat: Infinity, ease: 'easeInOut' },
+            }
+          : { type: 'spring', stiffness: 300, damping: 24 }
+      }
     />
   );
 }

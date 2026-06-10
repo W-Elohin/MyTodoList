@@ -15,6 +15,15 @@ import { EmptyStateWrapper } from '../components/illustrations/EmptyStateWrapper
 import { OctopusIllustration } from '../components/illustrations/OctopusIllustration';
 import { TodoCompleteButton } from '../components/TodoCompleteButton';
 import { DeleteConfirmButton, useDeleteConfirm } from '../components/DeleteConfirmButton';
+import { useGame } from '../context/GameContext';
+import {
+  fabMotionProps,
+  listItemVariants,
+  springTransition,
+  staggerDelay,
+  todoCompleteExit,
+  todoCreateVariants,
+} from '../utils/animations';
 
 export function TodoList() {
   const navigate = useNavigate();
@@ -26,6 +35,7 @@ export function TodoList() {
   const [activeFilter, setActiveFilter] = useState<FilterValue>('all');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const confetti = useConfetti();
+  const { awardCompletion } = useGame();
   const { pendingDeleteId, requestDelete } = useDeleteConfirm();
 
   useEffect(() => {
@@ -141,12 +151,9 @@ export function TodoList() {
     const target = allTodos.find((t) => t.id === id);
     if (!target || target.completed) return;
 
-    // 🎉 Celebrate!
-    if (e) {
-      confetti.fire(e.clientX, e.clientY);
-    } else {
-      confetti.fire();
-    }
+    if (e) confetti.fire(e.clientX, e.clientY);
+    else confetti.fire();
+    awardCompletion(target);
 
     let updated = allTodos.map((t) =>
       t.id === id ? { ...t, completed: true, completedAt: Date.now() } : t
@@ -240,11 +247,12 @@ export function TodoList() {
                 <motion.div
                   key={todo.id}
                   layout
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, x: -100 }}
-                  transition={{ delay: index * 0.05 }}
-                  whileHover={{ y: -2 }}
+                  variants={{ ...todoCreateVariants, ...todoCompleteExit }}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ ...springTransition, delay: staggerDelay(index) }}
+                  whileHover={{ y: -2, transition: { duration: 0.15 } }}
                   className="bg-white/10 backdrop-blur-sm rounded-2xl p-5 shadow-lg border border-white/15 hover:border-white/25 transition-colors"
                 >
                   <motion.div layout className="flex items-start gap-4">
@@ -353,8 +361,7 @@ export function TodoList() {
       </div>
 
       <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
+        {...fabMotionProps}
         onClick={() => {
           setEditingTodo(null);
           setShowAddDialog(true);

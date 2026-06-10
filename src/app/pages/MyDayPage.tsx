@@ -14,6 +14,16 @@ import { TodoCompleteButton } from '../components/TodoCompleteButton';
 import { useConfetti } from '../hooks/useConfetti';
 import { getFocusTasks } from '../utils/focus';
 import { CreatureImage } from '../components/creatures/CreatureImage';
+import { LevelBadge } from '../components/game/LevelBadge';
+import { useGame } from '../context/GameContext';
+import {
+  fabMotionProps,
+  listItemVariants,
+  springTransition,
+  staggerDelay,
+  todoCompleteExit,
+  todoCreateVariants,
+} from '../utils/animations';
 
 export function MyDayPage() {
   const navigate = useNavigate();
@@ -23,6 +33,7 @@ export function MyDayPage() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
   const confetti = useConfetti();
+  const { awardCompletion } = useGame();
 
   const loadTodos = () => {
     const today = getLocalDateString();
@@ -88,6 +99,7 @@ export function MyDayPage() {
     if (willComplete) {
       if (e) confetti.fire(e.clientX, e.clientY);
       else confetti.fire();
+      if (target) awardCompletion(target);
     }
 
     const updated = allTodos.map((t) =>
@@ -133,9 +145,9 @@ export function MyDayPage() {
           <motion.div>
             <motion.div className="flex items-center gap-3 mb-1">
               <GreetingEmoji emoji={greeting.emoji} />
-              <h1 className="text-2xl font-bold text-sky-50">{greeting.text}</h1>
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold ocean-heading">{greeting.text}</h1>
             </motion.div>
-            <p className="text-sm text-sky-300 ml-1">{greeting.sub}</p>
+            <p className="text-sm md:text-base ocean-body ml-1">{greeting.sub}</p>
           </motion.div>
           <button
             type="button"
@@ -147,17 +159,19 @@ export function MyDayPage() {
           </button>
         </motion.div>
 
+        <LevelBadge />
+
         {todayTotal > 0 ? (
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-6 p-4 rounded-2xl bg-white/[0.08] border border-white/15 backdrop-blur-md"
+            className="mb-6 p-4 rounded-2xl ocean-glass-panel"
           >
             <motion.div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-sky-200">
+              <span className="text-sm ocean-body">
                 今日の進捗 {todayCompleted}/{todayTotal}
               </span>
-              <span className="text-sm font-medium text-sky-100">{Math.round(progress)}%</span>
+              <span className="text-sm font-medium ocean-heading">{Math.round(progress)}%</span>
             </motion.div>
             <motion.div className="h-2 rounded-full bg-white/10 overflow-hidden">
               <motion.div
@@ -169,7 +183,7 @@ export function MyDayPage() {
             </motion.div>
           </motion.div>
         ) : (
-          <p className="text-sm text-sky-400 mb-6">まだ予定がありません</p>
+          <p className="text-sm ocean-muted mb-6">まだ予定がありません</p>
         )}
 
         {focusTask && (
@@ -185,12 +199,12 @@ export function MyDayPage() {
           >
             <div className="flex items-center gap-2 mb-1.5">
               <Sparkles size={15} className="text-sky-300" />
-              <span className="text-xs font-medium text-sky-200 tracking-wide">
+              <span className="text-xs font-medium ocean-body tracking-wide">
                 今のおすすめ
               </span>
             </div>
-            <p className="text-base font-medium text-sky-50 break-words">{focusTask.content}</p>
-            <div className="flex items-center gap-2 mt-1 text-xs text-sky-300">
+            <p className="text-base md:text-lg font-medium ocean-heading break-words">{focusTask.content}</p>
+            <div className="flex items-center gap-2 mt-1 text-xs ocean-body">
               {focusTask.date < todayStr && <span className="text-orange-300">期限切れ</span>}
               <span>{focusTask.date < todayStr ? `${focusTask.date} ` : ''}{focusTask.time}</span>
             </div>
@@ -216,9 +230,11 @@ export function MyDayPage() {
                 <motion.div
                   key={todo.id}
                   layout
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, x: -100 }}
+                  variants={listItemVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={springTransition}
                   className="bg-orange-500/[0.07] backdrop-blur-sm rounded-2xl p-4 border border-orange-400/25"
                 >
                   <div className="flex items-start gap-3">
@@ -227,7 +243,7 @@ export function MyDayPage() {
                       className="mt-0.5"
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="text-base mb-1 break-words text-sky-50">{todo.content}</p>
+                      <p className="text-base md:text-lg mb-1 break-words ocean-heading">{todo.content}</p>
                       <span className="text-xs text-orange-300/90">{todo.date} {todo.time}</span>
                     </div>
                     <button
@@ -266,11 +282,13 @@ export function MyDayPage() {
                 <motion.div
                   key={todo.id}
                   layout
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, x: -100 }}
-                  transition={{ delay: index * 0.05 }}
-                  className="bg-white/10 backdrop-blur-sm rounded-2xl p-5 shadow-lg border border-white/15 hover:border-white/25 transition-colors"
+                  variants={{ ...todoCreateVariants, ...todoCompleteExit }}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ ...springTransition, delay: staggerDelay(index) }}
+                  whileHover={{ y: -2, transition: { duration: 0.15 } }}
+                  className="ocean-glass-panel p-5 shadow-lg hover:border-[var(--glass-border-hover)] transition-colors"
                 >
                   <motion.div className="flex items-start gap-4">
                     <TodoCompleteButton
@@ -278,8 +296,8 @@ export function MyDayPage() {
                       className="mt-0.5"
                     />
                     <motion.div className="flex-1 min-w-0">
-                      <p className="text-base mb-2 break-words text-sky-50">{todo.content}</p>
-                      <motion.div className="flex flex-wrap items-center gap-2 text-sm text-sky-300">
+                      <p className="text-base md:text-lg mb-2 break-words ocean-heading">{todo.content}</p>
+                      <motion.div className="flex flex-wrap items-center gap-2 text-sm ocean-body">
                         <span>{todo.time}</span>
                         {todo.category && (
                           <span
@@ -312,8 +330,7 @@ export function MyDayPage() {
       </motion.div>
 
       <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
+        {...fabMotionProps}
         onClick={() => {
           setEditingTodo(null);
           setShowAddDialog(true);

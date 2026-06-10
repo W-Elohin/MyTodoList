@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
+import { springTransition } from '../utils/animations';
 
 interface TodoCompleteButtonProps {
   onComplete: (e: React.MouseEvent<HTMLButtonElement>) => void;
@@ -26,10 +27,12 @@ export function TodoCompleteButton({ onComplete, className = '' }: TodoCompleteB
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
       aria-label="完了にする"
-      whileTap={{ scale: 0.9 }}
+      whileTap={{ scale: 0.88 }}
+      animate={completing ? { scale: [1, 1.25, 1] } : { scale: 1 }}
+      transition={springTransition}
       className={`relative flex-shrink-0 w-7 h-7 rounded-full border-2 transition-colors mt-0.5 ${
         completing
-          ? 'bg-sky-400 border-sky-400'
+          ? 'bg-sky-400 border-sky-400 shadow-[0_0_12px_rgba(56,189,248,0.5)]'
           : 'border-white/30 hover:border-sky-400/60 bg-transparent'
       } ${className}`}
     >
