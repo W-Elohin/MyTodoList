@@ -36,6 +36,14 @@ export function OceanBackground() {
   const bubbles = useBubbles();
 
   useEffect(() => {
+    // 尊重「減少動態」偏好（a11y）：不啟動任何背景動畫，維持靜態畫面
+    if (
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    ) {
+      return;
+    }
+
     const anims: ReturnType<typeof animate>[] = [];
 
     // --- 波浪動畫 (3 層，translateX 循環) ---
