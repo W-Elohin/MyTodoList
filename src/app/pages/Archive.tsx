@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { Todo, TodoCategory } from '../types';
 import { storage, isTodoArray, isCategoryArray } from '../utils/storage';
+import { EmptyStateWrapper } from '../components/illustrations/EmptyStateWrapper';
+import { CreatureImage } from '../components/creatures/CreatureImage';
 
 export function Archive() {
   const navigate = useNavigate();
@@ -192,9 +194,11 @@ export function Archive() {
 
         <div className="space-y-6">
           {dates.length === 0 ? (
-            <div className="text-center py-16 text-sky-500">
-              <p className="text-lg">完了したタスクがありません</p>
-            </div>
+            <EmptyStateWrapper
+              illustration={<CreatureImage name="narwhal" size={150} />}
+              title="まだ完了したタスクがありません"
+              subtitle="タスクを終わらせると、ここに記録が残ります"
+            />
           ) : (
             dates.map((date) => (
               <motion.div key={date} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
