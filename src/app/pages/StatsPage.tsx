@@ -5,6 +5,7 @@ import { Todo } from '../types';
 import { storage } from '../utils/storage';
 import { getLocalDateString } from '../utils/date';
 import { calculateStats } from '../utils/statsCalculator';
+import { CreatureImage } from '../components/creatures/CreatureImage';
 
 const circleSize = 168;
 const strokeWidth = 14;
@@ -171,7 +172,10 @@ export function StatsPage() {
           <h2 className="font-semibold text-sky-100 mb-5">分類統計</h2>
           <div className="space-y-4">
             {stats.categoryBreakdown.length === 0 ? (
-              <p className="text-center text-sky-500 py-8">未完成タスクがありません</p>
+              <div className="text-center py-8">
+                <CreatureImage name="pufferfish" size={96} className="mx-auto mb-3" />
+                <p className="text-sky-500">未完成タスクがありません</p>
+              </div>
             ) : (
               stats.categoryBreakdown.map((category) => (
                 <div key={category.name}>
