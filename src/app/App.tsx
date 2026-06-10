@@ -8,6 +8,8 @@ import { initReminderService } from './utils/reminder';
 import { useUpdateCheck } from './hooks/useUpdateCheck';
 import { UpdatePrompt } from './components/UpdatePrompt';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { ThemeProvider } from './components/ThemeProvider';
+import { GameProvider } from './context/GameContext';
 
 export default function App() {
   const { updateAvailable, applyUpdate, dismissUpdate } = useUpdateCheck();
@@ -19,16 +21,20 @@ export default function App() {
 
   return (
     <ErrorBoundary>
-      {/* 全站動畫尊重使用者的「減少動態」系統偏好（a11y） */}
-      <MotionConfig reducedMotion="user">
-        <RouterProvider router={router} />
-        <Toaster position="top-center" richColors />
-        <UpdatePrompt
-          open={updateAvailable}
-          onUpdate={applyUpdate}
-          onDismiss={dismissUpdate}
-        />
-      </MotionConfig>
+      <ThemeProvider>
+        <GameProvider>
+          {/* 全站動畫尊重使用者的「減少動態」系統偏好（a11y） */}
+          <MotionConfig reducedMotion="user">
+            <RouterProvider router={router} />
+            <Toaster position="top-center" richColors />
+            <UpdatePrompt
+              open={updateAvailable}
+              onUpdate={applyUpdate}
+              onDismiss={dismissUpdate}
+            />
+          </MotionConfig>
+        </GameProvider>
+      </ThemeProvider>
     </ErrorBoundary>
   );
 }
