@@ -268,7 +268,7 @@ export function MyDayPage() {
                 <EmptyStateWrapper
                   illustration={<CreatureImage name="dolphin" size={180} className="mx-auto" />}
                   title="今日のタスク、全部完了！"
-                  subtitle="お見事です。少し休んでくださいね 🎉"
+                  subtitle="お見事です。少し休んでくださいね"
                 />
               ) : (
                 <EmptyStateWrapper
