@@ -11,7 +11,7 @@
 
 > **「打開 App 三秒內知道現在該做什麼；完成一件事時感覺被獎勵。」**
 
-完整研究與決策見 [`00_DESIGN_CHARTER.md`](00_DESIGN_CHARTER.md)（基於 Things 3 / Todoist / Linear 的線上調查）。
+完整研究與決策見 [`00_DESIGN_CHARTER.md`](../00_DESIGN_CHARTER.md)（基於 Things 3 / Todoist / Linear 的線上調查）。
 
 ---
 
@@ -19,16 +19,16 @@
 
 | PR | 主題 | 支柱 | PM_Guide |
 |---|---|---|---|
-| #1 | 設計章程 + 健壯性（storage 容錯 + ErrorBoundary） | 7 | 00, 01 |
-| #2 | 資訊架構重組：My Day 設為主角 + 逾期浮現 | 1 | 02 |
-| #3 | 設計 Token 收斂（漸層 + 優先度單一來源） | 2 | 03 |
-| #4 | 完成反饋微互動（勾選動畫 + confetti + 觸覺）帶到主視圖 | 4 | 04 |
-| #5 | My Day 智慧聚焦：推薦現在最該做的事 | 5 | 05 |
-| #6 | 效能：路由分割 + vendor 快取（主 bundle 578KB→218KB） | 8 | 06 |
-| #7 | 可訪問性：lang、aria-label、aria-current | 6 | 07 |
-| #8 | 資料備份強化：匯入驗證 + 一致 toast | 7 | 08 |
+| #1 | 設計章程 + 健壯性（storage 容錯 + ErrorBoundary） | 7 | pillars/01 |
+| #2 | 資訊架構重組：My Day 設為主角 + 逾期浮現 | 1 | pillars/02 |
+| #3 | 設計 Token 收斂（漸層 + 優先度單一來源） | 2 | pillars/03 |
+| #4 | 完成反饋微互動（勾選動畫 + confetti + 觸覺）帶到主視圖 | 4 | pillars/04 |
+| #5 | My Day 智慧聚焦：推薦現在最該做的事 | 5 | pillars/05 |
+| #6 | 效能：路由分割 + vendor 快取（主 bundle 578KB→218KB） | 8 | pillars/06 |
+| #7 | 可訪問性：lang、aria-label、aria-current | 6 | pillars/07 |
+| #8 | 資料備份強化：匯入驗證 + 一致 toast | 7 | pillars/08 |
 | #9 | 文件：整夜總結 + README 正式化 | — | — |
-| #10 | 統一完成體驗：Kanban 完成獎勵 | 4 | 09 |
+| #10 | 統一完成體驗：Kanban 完成獎勵 | 4 | pillars/09 |
 
 ---
 
@@ -40,9 +40,8 @@
 - **[PR #11](https://github.com/W-Elohin/MyTodoList/pull/11) 響應式 AppShell**（手機底部導航 → 桌面側邊欄）。
 - **刻意未自行合併**：這是全站佈局變更，而我在過夜環境無法截圖驗證（Preview MCP `EPERM`）。
   **請在 mobile(375)/tablet(768)/desktop(1280) 三寬度看過再合併。**
-- 分析與計畫見 `PM_Guide/10_UI_OVERHAUL_RESPONSIVE.md`、`PM_Guide/11_responsive_appshell.md`。
-- 階段 B（內容多欄 grid、字級階梯）、階段 C（視覺精緻化）**阻塞於 #11 的 review** —
-  我沒有在未驗證的基礎上繼續疊加盲改，避免製造爛攤子。
+- 分析與計畫見 [`design/responsive_overhaul.md`](../design/responsive_overhaul.md)（已合併原 10–13）。
+- 階段 B/C 與亮暗主題後續由 [20_commercialization_ux_polish.md](20_commercialization_ux_polish.md) 收尾。
 
 **你早上的最短路徑**：開 #11 預覽 → 三寬度看一眼 → OK 就合併，回我一聲我接著做階段 B/C；
 不 OK 就告訴我哪裡要調整。
@@ -67,11 +66,12 @@
 
 ## 仍待辦（建議的下一步）
 
-- **亮/暗模式**（支柱 5，需你視覺 review 後進行）
-- 把完成體驗統一到 Calendar / Kanban / Timeline（目前主要在 My Day 與 /list）
-- WCAG AA 對比度全面量測（需視覺工具）
+> 以下部分已由 [20_commercialization_ux_polish.md](20_commercialization_ux_polish.md) 完成：亮/暗模式、設定頁、WCAG 導向 a11y、RWD 收尾。
+
+- 把完成體驗統一到 Calendar / Timeline（Kanban 已完成）
 - 清理未使用相依（@mui、react-slick、emotion）並更新 lockfile
 - 匯入「合併 vs 取代」選項與覆蓋前確認
+- 上架打包（Capacitor / Tauri）
 
 ---
 

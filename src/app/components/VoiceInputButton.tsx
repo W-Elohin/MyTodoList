@@ -74,6 +74,9 @@ export function VoiceInputButton({
           type="button"
           disabled={disabled}
           onClick={onToggle}
+          aria-label={
+            isRecording ? '録音を停止' : isProcessing ? 'AI 認識中' : showSuccess ? '認識完了' : '音声入力を開始'
+          }
           whileTap={{ scale: 0.92 }}
           className={`relative z-10 w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-colors ${
             isRecording
@@ -137,7 +140,7 @@ export function VoiceInputButton({
                 />
               ))}
             </div>
-            <span className="text-xs text-gray-500">AI 辨識中...</span>
+            <span className="text-xs text-gray-500">AI 認識中...</span>
           </motion.div>
         )}
         {error && !isRecording && !isProcessing && (

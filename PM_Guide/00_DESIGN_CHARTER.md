@@ -92,7 +92,7 @@ Today 都是這個模式 — 業界已驗證。
 ## 五、設計 Token 系統（待建立）
 
 現有 Ocean 配色散落在 inline style 與 Tailwind class，缺乏單一真實來源（single source of truth）。
-下一步要把 `PM_Guide/claude_pro_ocean_theme.md` 記錄的色票收斂成 CSS 變數 + Tailwind theme，
+下一步要把 `PM_Guide/design/ocean_visual_system.md` 記錄的色票收斂成 CSS 變數 + Tailwind theme，
 確保亮/暗模式、對比度（WCAG AA）都從同一處派生。
 
 ---

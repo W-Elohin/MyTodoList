@@ -13,7 +13,6 @@ interface Bubble {
 
 function useBubbles(): Bubble[] {
   return useMemo(() => {
-    // Deterministic values so SSR matches client
     return Array.from({ length: BUBBLE_COUNT }, (_, i) => ({
       id: i,
       size: 3 + (i % 6) * 1.5,
@@ -36,7 +35,6 @@ export function OceanBackground() {
   const bubbles = useBubbles();
 
   useEffect(() => {
-    // 尊重「減少動態」偏好（a11y）：不啟動任何背景動畫，維持靜態畫面
     if (
       typeof window !== 'undefined' &&
       window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
@@ -46,7 +44,6 @@ export function OceanBackground() {
 
     const anims: ReturnType<typeof animate>[] = [];
 
-    // --- 波浪動畫 (3 層，translateX 循環) ---
     if (wave1Ref.current) {
       anims.push(
         animate(wave1Ref.current, {
@@ -78,7 +75,6 @@ export function OceanBackground() {
       );
     }
 
-    // --- 氣泡動畫 ---
     if (bubblesRef.current) {
       const bubbleEls = bubblesRef.current.querySelectorAll<HTMLElement>('.ocean-bubble');
       if (bubbleEls.length > 0) {
@@ -99,7 +95,6 @@ export function OceanBackground() {
       }
     }
 
-    // --- 光線呼吸動畫 ---
     const rays = [ray1Ref.current, ray2Ref.current, ray3Ref.current];
     rays.forEach((ray, i) => {
       if (ray) {
@@ -120,28 +115,23 @@ export function OceanBackground() {
     };
   }, []);
 
-  return (
-    <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
-      {/* 深海漸層背景 */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            'linear-gradient(180deg, #0a1628 0%, #1e3a5f 40%, #0c4a6e 70%, #0369a1 100%)',
-        }}
-      />
+  const rayStyle = {
+    background: `linear-gradient(180deg, var(--ocean-ray) 0%, transparent 100%)`,
+  } as const;
 
-      {/* 光線效果 */}
+  return (
+    <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden" aria-hidden>
+      <div className="absolute inset-0 ocean-bg" />
+
       <div
         ref={ray1Ref}
         className="absolute"
         style={{
+          ...rayStyle,
           top: '-20%',
           left: '10%',
           width: '180px',
           height: '120%',
-          background:
-            'linear-gradient(180deg, rgba(186,230,253,0.9) 0%, rgba(186,230,253,0) 100%)',
           transform: 'rotate(20deg)',
           transformOrigin: 'top center',
           opacity: 0.04,
@@ -151,12 +141,11 @@ export function OceanBackground() {
         ref={ray2Ref}
         className="absolute"
         style={{
+          ...rayStyle,
           top: '-20%',
           left: '35%',
           width: '120px',
           height: '110%',
-          background:
-            'linear-gradient(180deg, rgba(186,230,253,0.9) 0%, rgba(186,230,253,0) 100%)',
           transform: 'rotate(10deg)',
           transformOrigin: 'top center',
           opacity: 0.05,
@@ -166,39 +155,35 @@ export function OceanBackground() {
         ref={ray3Ref}
         className="absolute"
         style={{
+          ...rayStyle,
           top: '-20%',
           left: '62%',
           width: '90px',
           height: '90%',
-          background:
-            'linear-gradient(180deg, rgba(186,230,253,0.9) 0%, rgba(186,230,253,0) 100%)',
           transform: 'rotate(-8deg)',
           transformOrigin: 'top center',
           opacity: 0.03,
         }}
       />
 
-      {/* 氣泡 */}
       <div ref={bubblesRef} className="absolute inset-0">
         {bubbles.map((b) => (
           <div
             key={b.id}
-            className="ocean-bubble absolute rounded-full border border-white/20"
+            className="ocean-bubble absolute rounded-full border border-[var(--glass-border)]"
             style={{
               width: b.size,
               height: b.size,
               left: `${b.left}%`,
               bottom: `${b.initialBottom}%`,
-              backgroundColor: 'rgba(186,230,253,0.15)',
+              backgroundColor: 'var(--ocean-bubble)',
               opacity: b.opacity,
             }}
           />
         ))}
       </div>
 
-      {/* 3 層海浪 SVG */}
       <div className="absolute bottom-0 left-0 right-0 overflow-hidden" style={{ height: 160 }}>
-        {/* 第 1 層：最慢、最深 */}
         <svg
           viewBox="0 0 1400 80"
           preserveAspectRatio="none"
@@ -208,16 +193,15 @@ export function OceanBackground() {
           <g ref={wave1Ref}>
             <path
               d="M0,40 C175,0 350,80 525,40 C700,0 875,80 1050,40 C1225,0 1400,80 1400,40 L1400,80 L0,80 Z"
-              fill="#1e3a5f"
+              fill="var(--ocean-wave-1)"
             />
             <path
               d="M700,40 C875,0 1050,80 1225,40 C1400,0 1575,80 1750,40 C1925,0 2100,80 2100,40 L2100,80 L700,80 Z"
-              fill="#1e3a5f"
+              fill="var(--ocean-wave-1)"
             />
           </g>
         </svg>
 
-        {/* 第 2 層：中速、藍綠 */}
         <svg
           viewBox="0 0 1400 80"
           preserveAspectRatio="none"
@@ -227,16 +211,15 @@ export function OceanBackground() {
           <g ref={wave2Ref}>
             <path
               d="M0,30 C140,60 280,10 420,35 C560,60 700,10 840,35 C980,60 1120,10 1260,35 C1400,60 1400,35 1400,35 L1400,80 L0,80 Z"
-              fill="#0369a1"
+              fill="var(--ocean-wave-2)"
             />
             <path
               d="M700,30 C840,60 980,10 1120,35 C1260,60 1400,10 1540,35 C1680,60 1820,10 1960,35 C2100,60 2100,35 2100,35 L2100,80 L700,80 Z"
-              fill="#0369a1"
+              fill="var(--ocean-wave-2)"
             />
           </g>
         </svg>
 
-        {/* 第 3 層：最快、最淺 */}
         <svg
           viewBox="0 0 1400 80"
           preserveAspectRatio="none"
@@ -246,11 +229,11 @@ export function OceanBackground() {
           <g ref={wave3Ref}>
             <path
               d="M0,20 C100,50 200,5 300,25 C400,50 500,5 600,25 C700,50 800,5 900,25 C1000,50 1100,5 1200,25 C1300,50 1400,20 1400,20 L1400,80 L0,80 Z"
-              fill="#38bdf8"
+              fill="var(--ocean-wave-3)"
             />
             <path
               d="M700,20 C800,50 900,5 1000,25 C1100,50 1200,5 1300,25 C1400,50 1500,5 1600,25 C1700,50 1800,5 1900,25 C2000,50 2100,20 2100,20 L2100,80 L700,80 Z"
-              fill="#38bdf8"
+              fill="var(--ocean-wave-3)"
             />
           </g>
         </svg>

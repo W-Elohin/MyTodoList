@@ -41,29 +41,23 @@ export function StatsPage() {
   const today = getLocalDateString();
   const strokeOffset = circumference - (stats.todayCompletionRate / 100) * circumference;
 
-  const glassPanel = {
-    background: 'rgba(255,255,255,0.06)',
-    backdropFilter: 'blur(20px)',
-    WebkitBackdropFilter: 'blur(20px)',
-    border: '1px solid rgba(255,255,255,0.12)',
-  } as const;
+  const glassPanelClass = 'ocean-glass-panel shadow-lg shadow-black/10';
 
   return (
     <>
       <div>
         <div className="flex items-center gap-3 mb-6">
           <BarChart3 size={32} className="text-sky-400" />
-          <h1 className="text-2xl md:text-3xl font-bold text-sky-50">統計</h1>
+          <h1 className="text-2xl md:text-3xl font-bold ocean-heading">統計</h1>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <motion.section
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-2xl p-6 shadow-lg shadow-black/20"
-            style={glassPanel}
+            className={`rounded-2xl p-6 ${glassPanelClass}`}
           >
-            <h2 className="font-semibold text-sky-100 mb-5">今日完成率</h2>
+            <h2 className="font-semibold ocean-heading mb-5">今日の完了率</h2>
             <div className="flex items-center justify-center">
               <div className="relative" style={{ width: circleSize, height: circleSize }}>
                 <svg width={circleSize} height={circleSize} className="-rotate-90">
@@ -80,7 +74,7 @@ export function StatsPage() {
                     cy={circleSize / 2}
                     r={radius}
                     fill="none"
-                    stroke="#0ea5e9"
+                    stroke="var(--chart-accent)"
                     strokeLinecap="round"
                     strokeWidth={strokeWidth}
                     strokeDasharray={circumference}
@@ -94,11 +88,11 @@ export function StatsPage() {
                     key={stats.todayCompletionRate}
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-4xl font-bold text-sky-50"
+                    className="text-4xl font-bold ocean-heading"
                   >
                     {stats.todayCompletionRate}%
                   </motion.span>
-                  <span className="text-xs text-sky-400 mt-1">
+                  <span className="text-xs ocean-body mt-1">
                     {stats.todayCompleted}/{stats.todayTotal}
                   </span>
                 </div>
@@ -110,10 +104,9 @@ export function StatsPage() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.08 }}
-            className="rounded-2xl p-6 shadow-lg shadow-black/20"
-            style={glassPanel}
+            className={`rounded-2xl p-6 ${glassPanelClass}`}
           >
-            <h2 className="font-semibold text-sky-100 mb-5">連続達成</h2>
+            <h2 className="font-semibold ocean-heading mb-5">連続達成</h2>
             <div className="h-[168px] flex flex-col items-center justify-center">
               <motion.div
                 key={stats.streak}
@@ -121,11 +114,11 @@ export function StatsPage() {
                 animate={{ scale: 1, opacity: 1 }}
                 className="flex items-end gap-3"
               >
-                <span className="text-6xl font-bold text-sky-50">{stats.streak}</span>
+                <span className="text-6xl font-bold ocean-heading">{stats.streak}</span>
                 <span className="text-4xl leading-tight">🔥</span>
               </motion.div>
-              <p className="text-sm text-sky-400 mt-3">日連続で達成中</p>
-              <p className="text-xs text-sky-500 mt-2">累計完了 {stats.totalCompleted} 件</p>
+              <p className="text-sm ocean-body mt-3">日連続で達成中</p>
+              <p className="text-xs ocean-muted mt-2">累計完了 {stats.totalCompleted} 件</p>
             </div>
           </motion.section>
         </div>
@@ -134,10 +127,9 @@ export function StatsPage() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.12 }}
-          className="rounded-2xl p-6 shadow-lg shadow-black/20 mb-4"
-          style={glassPanel}
+          className={`rounded-2xl p-6 mb-4 ${glassPanelClass}`}
         >
-          <h2 className="font-semibold text-sky-100 mb-5">本週トレンド</h2>
+          <h2 className="font-semibold ocean-heading mb-5">本週トレンド</h2>
           <div className="h-52 flex items-end gap-3">
             {stats.weeklyData.map((day) => {
               const height = Math.max((day.count / maxWeeklyCount) * 150, day.count > 0 ? 14 : 4);
@@ -145,15 +137,15 @@ export function StatsPage() {
 
               return (
                 <div key={day.date} className="flex-1 h-full flex flex-col items-center justify-end gap-2">
-                  <span className="text-xs font-semibold text-sky-400">{day.count}</span>
+                  <span className="text-xs font-semibold ocean-body">{day.count}</span>
                   <motion.div
                     initial={{ height: 0 }}
                     animate={{ height }}
                     transition={{ duration: 0.6, ease: 'easeOut' }}
                     className="w-full max-w-12 rounded-t-xl"
-                    style={{ backgroundColor: isToday ? '#0ea5e9' : 'rgba(255,255,255,0.2)' }}
+                    style={{ backgroundColor: isToday ? 'var(--chart-accent)' : 'var(--chart-muted)' }}
                   />
-                  <span className={`text-[11px] ${isToday ? 'text-sky-300 font-semibold' : 'text-sky-500'}`}>
+                  <span className={`text-[11px] ${isToday ? 'ocean-heading font-semibold' : 'ocean-muted'}`}>
                     {formatDayLabel(day.date)}
                   </span>
                 </div>
@@ -166,24 +158,23 @@ export function StatsPage() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.16 }}
-          className="rounded-2xl p-6 shadow-lg shadow-black/20"
-          style={glassPanel}
+          className={`rounded-2xl p-6 ${glassPanelClass}`}
         >
-          <h2 className="font-semibold text-sky-100 mb-5">分類統計</h2>
+          <h2 className="font-semibold ocean-heading mb-5">カテゴリー別統計</h2>
           <div className="space-y-4">
             {stats.categoryBreakdown.length === 0 ? (
               <div className="text-center py-8">
                 <CreatureImage name="pufferfish" size={96} className="mx-auto mb-3" />
-                <p className="text-sky-500">未完成タスクがありません</p>
+                <p className="ocean-muted">未完成タスクがありません</p>
               </div>
             ) : (
               stats.categoryBreakdown.map((category) => (
                 <div key={category.name}>
                   <div className="flex items-center justify-between text-sm mb-2">
-                    <span className="font-medium text-sky-200">{category.name}</span>
-                    <span className="text-sky-400">{category.count}</span>
+                    <span className="font-medium ocean-heading">{category.name}</span>
+                    <span className="ocean-body">{category.count}</span>
                   </div>
-                  <div className="h-3 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)' }}>
+                  <div className="h-3 rounded-full overflow-hidden" style={{ background: 'var(--chart-muted)' }}>
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${(category.count / maxCategoryCount) * 100}%` }}

@@ -1,14 +1,28 @@
 
   <!DOCTYPE html>
-  <html lang="en">
+  <html lang="ja" suppressHydrationWarning>
     <head>
       <meta charset="UTF-8" />
+      <script>
+        (function () {
+          try {
+            var t = localStorage.getItem('theme');
+            var dark =
+              t === 'dark' ||
+              !t ||
+              (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (dark) document.documentElement.classList.add('dark');
+          } catch (e) {}
+        })();
+      </script>
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="manifest" href="/manifest.json" />
       <link rel="apple-touch-icon" href="/icon.png" />
       <title>MyTodoList</title>
-      <script type="module" crossorigin src="/assets/index-C3bxcO6I.js"></script>
-      <link rel="stylesheet" crossorigin href="/assets/index-tO8aX9d4.css">
+      <script type="module" crossorigin src="/assets/index-DIZ6tqzz.js"></script>
+      <link rel="modulepreload" crossorigin href="/assets/vendor-react-Dcd7vkZ0.js">
+      <link rel="modulepreload" crossorigin href="/assets/vendor-motion-D4SDBiyq.js">
+      <link rel="stylesheet" crossorigin href="/assets/index-CC-JsGPc.css">
     </head>
 
     <body>

@@ -25,7 +25,7 @@ const showReminder = (todo: Todo) => {
   }
 
   new Notification(todo.content, {
-    body: '任務到期提醒',
+    body: 'タスクの期限です',
     icon: '/icon-192x192.png',
   });
 };

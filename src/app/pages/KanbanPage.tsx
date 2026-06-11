@@ -70,6 +70,16 @@ export function KanbanPage() {
   const getColumnTodos = (key: PriorityColumn['key']) =>
     activeTodos.filter((todo) => (key === 'uncategorized' ? !todo.priority : todo.priority === key));
 
+  const handleChangePriority = (id: string, priority: Todo['priority']) => {
+    const allTodos = storage.getTodos();
+    const updated = allTodos.map((todo) =>
+      todo.id === id ? { ...todo, priority } : todo
+    );
+    storage.saveTodos(updated);
+    window.dispatchEvent(new Event('storage'));
+    loadTodos();
+  };
+
   const handleToggleComplete = (id: string, e?: React.MouseEvent) => {
     // 完成獎勵：與 My Day / list 一致（confetti + 觸覺），統一各頁完成體驗
     if (e) confetti.fire(e.clientX, e.clientY);
@@ -88,19 +98,14 @@ export function KanbanPage() {
     loadTodos();
   };
 
-  const glassPanel = {
-    background: 'rgba(255,255,255,0.06)',
-    backdropFilter: 'blur(16px)',
-    WebkitBackdropFilter: 'blur(16px)',
-    border: '1px solid rgba(255,255,255,0.1)',
-  } as const;
+  const glassPanelClass = 'ocean-glass-panel shadow-lg shadow-black/10';
 
   return (
     <>
       <div>
         <div className="flex items-center gap-3 mb-6">
           <Columns3 size={32} className="text-sky-400" />
-          <h1 className="text-2xl md:text-3xl font-bold text-sky-50">看板</h1>
+          <h1 className="text-2xl md:text-3xl font-bold ocean-heading">カンバン</h1>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
@@ -110,7 +115,7 @@ export function KanbanPage() {
             { label: '未完了', value: summary.active },
             { label: '今日期限', value: summary.dueToday },
           ].map((item) => (
-            <motion.div key={item.label} layout className="rounded-2xl p-4 shadow-lg shadow-black/20" style={glassPanel}>
+            <motion.div key={item.label} layout className={`rounded-2xl p-4 ${glassPanelClass}`}>
               <p className="text-xs font-medium text-sky-400 mb-2">{item.label}</p>
               <AnimatedNumber value={item.value} />
             </motion.div>
@@ -150,19 +155,17 @@ export function KanbanPage() {
                       </motion.div>
                     ) : (
                       columnTodos.map((todo, index) => (
-                        <motion.button
+                        <motion.div
                           key={todo.id}
                           layout
                           initial={{ opacity: 0, y: 14 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, scale: 0.94, x: 24 }}
                           transition={{ delay: index * 0.03 }}
-                          onClick={(e) => handleToggleComplete(todo.id, e)}
-                          className="w-full text-left rounded-2xl p-4 shadow-md hover:shadow-lg transition-all"
-                          style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)' }}
+                          className="w-full text-left rounded-2xl p-4 shadow-md transition-all ocean-glass-panel"
                         >
-                          <p className="text-sm font-medium text-sky-50 break-words mb-3">{todo.content}</p>
-                          <div className="flex flex-wrap items-center gap-2 text-xs text-sky-400">
+                          <p className="text-sm font-medium ocean-heading break-words mb-3">{todo.content}</p>
+                          <div className="flex flex-wrap items-center gap-2 text-xs ocean-body mb-3">
                             <span>{todo.date}</span>
                             <span>{todo.time}</span>
                             {todo.category && (
@@ -171,12 +174,37 @@ export function KanbanPage() {
                               </span>
                             )}
                             {todo.tags?.map((tag) => (
-                              <span key={`${todo.id}-${tag.id}`} className="px-2 py-0.5 rounded-lg border border-white/15 text-sky-400">
+                              <span key={`${todo.id}-${tag.id}`} className="px-2 py-0.5 rounded-lg border border-[var(--glass-border)] ocean-body">
                                 #{tag.name}
                               </span>
                             ))}
                           </div>
-                        </motion.button>
+                          <div className="flex flex-wrap items-center gap-2" role="group" aria-label="優先度を変更">
+                            {(['low', 'medium', 'high'] as const).map((p) => (
+                              <button
+                                key={p}
+                                type="button"
+                                onClick={() => handleChangePriority(todo.id, p)}
+                                aria-label={`${PRIORITY_META[p].label}に移動`}
+                                aria-pressed={todo.priority === p}
+                                className={`px-2 py-1 rounded-lg text-xs border transition-colors ${
+                                  todo.priority === p
+                                    ? 'border-[var(--ocean-surface)] bg-[var(--nav-active-bg)] ocean-heading'
+                                    : 'border-[var(--glass-border)] ocean-muted hover:bg-[var(--glass-bg-hover)]'
+                                }`}
+                              >
+                                {PRIORITY_META[p].label}
+                              </button>
+                            ))}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={(e) => handleToggleComplete(todo.id, e)}
+                            className="mt-3 w-full py-2 rounded-xl text-xs font-medium border border-[var(--glass-border)] hover:bg-[var(--glass-bg-hover)] transition-colors ocean-heading"
+                          >
+                            完了にする
+                          </button>
+                        </motion.div>
                       ))
                     )}
                   </AnimatePresence>
